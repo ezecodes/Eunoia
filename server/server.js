@@ -1,6 +1,5 @@
 require('dotenv').config()
 const mongoose = require('mongoose')
-const path = require('path')
 const io = require('./socs')
 const app = require('./app.js')
 const server = require('http').createServer(app)

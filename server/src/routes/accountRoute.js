@@ -7,6 +7,7 @@ const {
 	matchPassword,
 	updatePassword,
 	getAccount,
+	saveProfileInfo,
 	getUsers,
 	getUserProfile,
 	setNotify
@@ -16,6 +17,7 @@ accountRoute.put('/updateSocials/:id', updateSocials)
 accountRoute.put('/matchPassword/:id', matchPassword)
 accountRoute.put('/updatePassword/:id', updatePassword)
 accountRoute.put('/setNotify/:id', setNotify)
+accountRoute.put('/saveProfileInfo/:id', saveProfileInfo)
 
 accountRoute.delete('/deleteSocial/:id', deleteSocial)
 

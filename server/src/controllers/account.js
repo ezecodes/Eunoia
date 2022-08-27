@@ -126,6 +126,7 @@ module.exports = {
 	updatePassword,
 	deleteSocial,
 	setNotify,
+	saveProfileInfo,
 	updateSocials,
 	getAccount
 }
