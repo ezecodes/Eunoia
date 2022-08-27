@@ -15,7 +15,6 @@ const {
 
 const {
 	fetchGroupChats,
-	fetchUpdatedGroupField
 } = require('../controllers/groups')
 
 const {
@@ -32,7 +31,6 @@ chatRoute.put('/saveUnread/:userId/:sender/:chatId', saveUnreadChat)
 chatRoute.delete('/clearConversation/:userId/:username', clearConversation)
 
 chatRoute.get('/fetchGroupChats/:userId/:groupId', fetchGroupChats)
-chatRoute.get('/fetchUpdatedGroupField/:userId/:groupId', fetchUpdatedGroupField)
 
 chatRoute.put('/starGroup/:userId/:groupId', starGroup)
 chatRoute.put('/setGroupUnread/:userId/:groupId/:chatId', setGroupUnread)

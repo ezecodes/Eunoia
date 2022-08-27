@@ -112,7 +112,7 @@ async function fetchRecentChats(request, response) {
 				'groups.name': 1,
 				'groups._id': 1,
 				'groups.chatType': 1,
-				'groups.messages': 1,
+				'groups.lastChat': 1,
 				'groups.isStarred': 1,
 				'groups.unread': 1,
 				'groups.isNull': 1,

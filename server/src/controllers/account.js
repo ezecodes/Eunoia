@@ -1,27 +1,52 @@
 const bcrypt = require('bcrypt')
 const User = require('../models/User.js')
 
+async function setNotify(req, res) {
+	const {id} = req.params
+	const {update} = req.body
+
+	const {notifications} = await User.findByIdAndUpdate(id, {
+		notifications: update
+	}, {new: true})
+
+	res.send({notifications})
+}
+
+async function saveProfileInfo(req, res) {
+	const {id} = req.params
+
+	const {newDisplayName, newBio} = req.body
+
+	const {displayName, bio} = await User.findByIdAndUpdate(id, {
+		displayName: newDisplayName,
+		bio: newBio
+	})
+
+	res.send({displayName, bio})
+}
+
 async function getUsers(request, response) {
 	const { id } = request.params
  	const users = await User.find({_id: {$ne: id}}, {
- 		username: 1, displayName: 1, lastSeen: 1, bio: 1, joined: 1, pId: 1, _id: 0
+ 		username: 1, 
+ 		displayName: 1, 
+ 		lastSeen: 1, 
+ 		bio: 1, 
+ 		joined: 1, 
+ 		pId: 1, 
+		socials: 1,
+ 		_id: 0
  	})
 
- 	response.send({users: users})
+ 	users.map(i => {
+ 		if (!i.socials) return
+
+ 		i.socials = i.socials.filter(social => social.hidden === false)
+
+ 	})
+
+ 	response.send({users})
 }
-
-async function getUserProfile(request, response) {
-	const {id, username} = request.params
-	
-	const friend = await User.findOne({username}, {_id: 0, bio: 1, socials: 1})
-
-	response.send({profile: {
-		username,
-		bio: friend.bio || '',
-		socials: friend.socials.filter(i => !i.hidden)
-	}})
-}
-
 async function matchPassword(request, response) {
 	const id = request.params.id
  	const user = await User.findById(id)
@@ -88,6 +113,7 @@ async function getAccount(request, response) {
 		socials: 1,
 		bio: 1,
 		displayName: 1,
+		notifications: 1,
 		updateNameTimestamp: 1,
 		createdGroups: 1
 	})
@@ -96,10 +122,10 @@ async function getAccount(request, response) {
 
 module.exports = {
 	getUsers,
-	getUserProfile,
 	matchPassword,
 	updatePassword,
 	deleteSocial,
+	setNotify,
 	updateSocials,
 	getAccount
 }

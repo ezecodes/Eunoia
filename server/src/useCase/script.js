@@ -6,6 +6,12 @@ const userUtil = {
 	setLastSeen: async (id) => {
 		await User.findOneAndUpdate({_id: id}, {lastSeen: Date.now()})
 	},
+	confirmUser: async (id, cb) => {
+		if (!id) return 
+
+		const user = await User.findById(id)
+		if (user) cb()
+	}
 }
 
 const unreadUtil = {
@@ -30,30 +36,35 @@ const unreadUtil = {
 }
 
 const groupsUtil = {
-	createGroup: async (groupDetails) => {
+	createGroup: async (groupDetails, cb) => {
 		const {name, createdBy, createdAt, participants, admins, messages} = groupDetails
-		const newGroup = await PrivateGroup.create({
+
+		await PrivateGroup.create({
 			name,
 			createdBy,
 			participants,
 			messages,
 			admins,
 			createdAt,
-		}, {new: true, upsert: true})
-
-		participants.forEach( async user => {
-			await Chat.findOneAndUpdate({username: user.username}, {
-				$push: {
-					groups: {
-						_id: newGroup[0].id,
-						name: newGroup[0].name,
-						lastChat: messages.at(-1),
-						unread: [...messages.map(i => i.chatId)]
+		}, (err, ...args) => {
+			const newGroup = args[0]
+			participants.forEach( async user => {
+				await Chat.findOneAndUpdate({username: user.username}, {
+					$push: {
+						groups: {
+							_id: newGroup.id,
+							name: newGroup.name,
+							lastChat: messages[messages.length -1],
+							unread: [...messages.map(i => i.chatId)]
+						}
 					}
-				}
+				})
 			})
+			cb(newGroup.id)
 		})
-		return newGroup[0].id
+
+		
+		// console.log(newGroup[0])
 	},
 
 	fetchParticipants: async (groupId) => {
@@ -72,18 +83,18 @@ const groupsUtil = {
 		})
 	},
 
-	addAdmin: async ({groupId, username}) => {
-		await PrivateGroup.findOne({_id: groupId})
+	addAdmin: async ({_id, username}, cb) => {
+		await PrivateGroup.findOne({_id: _id})
 		.exec((err, docs) => {
-			if (docs !== null && docs.createdBy.username !== username) {
-				const find = docs.admins.findIndex(i => i.username === username)
-				if (find === -1) {
-					docs.admins.push({username})
-				} else {
-					docs.admins.splice(find, 1)
-				}
-				docs.save()
+			if (docs === null) return
+			const find = docs.admins.findIndex(i => i.username === username)
+			if (find !== -1) {
+				docs.admins.splice(find, 1)
+			} else {
+				docs.admins.push({username})
 			}
+			docs.save()
+			cb(docs.admins)
 		})
 	},
 
@@ -93,21 +104,29 @@ const groupsUtil = {
 		})
 	},
 	saveChat: async ({_id, chat}) => {
-		await PrivateGroup.findByIdAndUpdate(_id, {
-			$push: {
-				messages: chat
-			}
+		await PrivateGroup.findOne({_id})
+		.exec((err, docs) => {
+			docs.messages.push(chat)
+			docs.save()
+
+			docs.participants.forEach( async ({username}) => {
+				await Chat.findOneAndUpdate({username: username, 'groups._id': _id}, {
+					'groups.$.lastChat': chat
+				})
+			})
 		})
 
 	},
 
-	saveSettings: async ({groupId, settings}) => {
-		await PrivateGroup.findByIdAndUpdate(groupId, {
-			settings: settings
-		})
+	saveSettings: async (_id, _settings) => {
+		const {settings} = await PrivateGroup.findByIdAndUpdate(_id, {
+			settings: _settings
+		}, {new: true})
+
+		return settings
 	},
 
-	saveName: async (creator, {_id, groupName, message}) => {
+	saveName: async ({_id, groupName, message}, cb) => {
 		await PrivateGroup.findOne({_id: _id})
 		.exec((err, docs) => {
 			if (docs === null || docs === undefined) return false
@@ -116,45 +135,50 @@ const groupsUtil = {
 			docs.messages.push(message)
 
 			docs.participants.forEach( async ({username}) => {
-				await Chat.findOneAndUpdate({username: username, 'groups._id': _id}, {
+				await Chat.findOneAndUpdate({username, 'groups._id': _id}, {
 					'groups.$.name': groupName
 				})
 			})
 			docs.save()
+			cb(docs.name)
 		})
 	},
 
 	removeGroupUser: async ({_id, username, message}, cb) => {
 		await Chat.findOneAndUpdate({username: username, 'groups._id': _id}, {
-			'groups.$.isNull': true
+			'groups.$.isNull': true,
+			'groups.$.lastChat': message
 		})
-		const participants = await PrivateGroup.findByIdAndUpdate(_id, {
-			$pull: {
-				participants: {username},
-				admins: {username}
-			},
-			$push: {
-				messages: message
-			}
-		}, {new: true})
-		
-		console.log(participants)
 
+		await PrivateGroup.findById(_id)
+		.exec((err, docs) => {
+			if (!docs) return
+
+			docs.participants = docs.participants.filter(i => i.username !== username)
+			docs.admins = docs.admins.filter(i => i.username !== username)
+			docs.messages.push(message)
+			docs.save()
+			cb(docs.participants, docs.admins)
+		})
+		
 	},
 
 	addGroupMembers: async ({_id, members, message}, cb) => {
-		const find = await PrivateGroup.findById(_id, {_id: 0, name: 1})
+		const findGroup = await PrivateGroup.findById(_id, {_id: 0, name: 1})
 
 		members.forEach( async ({username}) => {
-			await Chat.findOneAndUpdate({username: username}, {
-				$push: {
-					groups: {
-						_id,
-						name: find.name,
-						lastChat: message,
-						unread: [message.chatId]
-					}
-				}
+			await Chat.findOne({username: username})
+			.exec((err, docs) => {
+				if (!docs) return
+
+				docs.groups = docs.groups.filter(i => i.id !== _id)
+				docs.groups.push({
+					_id,
+					name: findGroup.name,
+					lastChat: message,
+					unread: [message.chatId]
+				})
+				docs.save()
 			})
 		})
 
@@ -172,14 +196,16 @@ const groupsUtil = {
 		})
 	},
 
-	saveDescription: async ({groupId, description, message}) => {
+	saveDescription: async ({_id, desc, message}) => {
 
-		await PrivateGroup.findByIdAndUpdate(groupId, {
-			description: description,
+		const {description} = await PrivateGroup.findByIdAndUpdate(_id, {
+			description: desc,
 			$push: {
 				messages: message
 			}
-		})
+		}, {new: true, upsert: true})
+
+		return description
 	},
 
 	deleteForAll: async ({_id, chatId}) => {
@@ -226,6 +252,13 @@ const chatsUtil = {
 					username: user1,
 					chats: [newChatObj]
 				})
+			}
+		})
+	},
+	saveUnread: async ({receiver, sender, chatId}) => {
+		await Chat.findOneAndUpdate({username: receiver, 'chats.username': sender}, {
+			$push : {
+				'chats.$.unread': chatId
 			}
 		})
 	},

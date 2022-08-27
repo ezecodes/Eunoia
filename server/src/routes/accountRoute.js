@@ -8,18 +8,18 @@ const {
 	updatePassword,
 	getAccount,
 	getUsers,
-	getUserProfile
+	getUserProfile,
+	setNotify
 } = require('../controllers/account.js')
 
 accountRoute.put('/updateSocials/:id', updateSocials)
 accountRoute.put('/matchPassword/:id', matchPassword)
 accountRoute.put('/updatePassword/:id', updatePassword)
+accountRoute.put('/setNotify/:id', setNotify)
 
 accountRoute.delete('/deleteSocial/:id', deleteSocial)
 
 accountRoute.get('/accountData/:id', getAccount)
 accountRoute.get('/users/:id', getUsers)
-accountRoute.get('/profile/:id/:userpId', getUserProfile)
-
 
 module.exports = accountRoute

@@ -1,31 +1,17 @@
 const mongoose = require('mongoose')
 
 const schema = new mongoose.Schema({
-	_id: {
-		type: mongoose.Schema.Types.ObjectId,
-		default: mongoose.Types.ObjectId
-	},
 	name: String,
 	createdAt: {type: Date, default: Date.now},
 	admins: [{
-		username: {
-			type: String,
-			index: {
-				unique: true
-			}, 
-		} 
+		username: String
 	}],
 	createdBy: {
 		username: { type: String}
 	},
 	description: {type: String, default: ''},
 	participants: [{
-		username: {
-			type: String,
-			index: {
-				unique: true
-			}, 
-		}
+		username: String
 	}],
 	settings: {
 		allowEditForAdminsOnly: {type: Boolean, default: true},
