@@ -67,21 +67,26 @@ const useStyles = makeStyles({
 	},
 	critical: {
 		margin: '25px 0 0 0',
+		'& > div': {
+			padding: '10px 0',
+
+			'& > label': {
+				fontSize: '1rem',
+				marginLeft: '10px'
+			}
+		}
 	},
 	bottomSnackbar: {
 		width: '100%'
 	},
 })
-function GroupSettings({group, description, settings, createdBy}) {
+function GroupSettings({_id, name, description, settings, isAdmin}) {
 	const dispatch = useDispatch()
 	const classes = useStyles()
-	const {createdGroups, id, username, online} = useSelector(state => state.account.account)
-	const {groupName, groupId} = group
+	const {id, username, online} = useSelector(state => state.account.account)
 	const [showProgress, setProgress] = React.useState(false)
 	const nameRef = React.createRef(null)
 	const descRef = React.createRef(null)
-
-	const [value, setValue] = React.useState(() => settings.allowEditForAdminsOnly ? 'admins' : 'all');
 
 	const closeComp = () => {
 		dispatch(setComponents({component: 'gRoot', parent: 'gInfos'}))
@@ -90,10 +95,13 @@ function GroupSettings({group, description, settings, createdBy}) {
 		setOpen(false)
 	}
 	const handleRadioChange = (value) => {
-    setValue(value);
-    emit('handleGroupSettings', id, groupId, {
-    	allowEditForAdminsOnly: value === 'admins' ? true : false
+    emit('handleGroupSettings', {
+    	_id,
+    	settings: {
+    		allowEditForAdminsOnly: value === 'admins' ? true : false
+    	}
     })
+    
   };
   const setErr = (val) => {
   	dispatch(handleAlert(val))
@@ -106,27 +114,28 @@ function GroupSettings({group, description, settings, createdBy}) {
   		closeComp()
   		return false
   	}
-  	if (nameInput.value === groupName) return false
+  	if (nameInput.value === name) return false
 		if (nameInput.value.match(/[0-9a-z]/ig) === null) {
-			nameInput.value = groupName
-			setErr({open: true, msg: 'Group name can\'t be empty', severity: 'info'})
+			nameInput.value = name
 			closeComp()
+			setErr({open: true, msg: 'Group name can\'t be empty', severity: 'info'})
 			return false
 		}
   	const _date = new Date()
 		const dateNow = () => _date.getTime()
 		const thisDate = dateNow()
 
-		emit('editGroupName', id, createdBy, {
-			groupName: nameInput.value,
-			groupId,
-			message: {
-				type: 'alert',
-				chatId: thisDate,
-				message: `${username} changed the group name`,
-				timestamp: retrieveDate()
+		emit(
+			'editGroupName', 
+			{
+				_id,
+				groupName: nameInput.value,
+				message: {
+					type: 'alert',
+					chatId: thisDate,
+					message: `${username} changed the group name`,
+					timestamp: retrieveDate()
 			},
-				
 		})
 
   }
@@ -145,9 +154,9 @@ function GroupSettings({group, description, settings, createdBy}) {
 		const dateNow = () => _date.getTime()
 		const thisDate = dateNow()
 		
-		emit('editGroupDescription', id, {
+		emit('editGroupDescription', {
+			_id,
 			description: descInput.value,
-			groupId,
 			message: {
 				type: 'alert',
 				chatId: thisDate,
@@ -156,17 +165,16 @@ function GroupSettings({group, description, settings, createdBy}) {
 			}
 		})
 	}
-	
-  React.useEffect(() => {
-  	if (nameRef.current !== undefined && nameRef.current !== null) {
-  	 (nameRef.current.querySelector('input').value = groupName)
+
+	React.useEffect(() => {
+  	if (nameRef.current) {
+  	 (nameRef.current.querySelector('input').value = name)
   	}
-  	if (descRef.current !== undefined && descRef.current !== null) {
+  	if (descRef.current) {
   	 (descRef.current.querySelector('textarea').value = description)
   	}
-		if (settings.allowEditForAdminsOnly) setValue('admins')
-		else setValue('all')
   }, [])
+	
 
 	return (
 		<>
@@ -210,13 +218,22 @@ function GroupSettings({group, description, settings, createdBy}) {
 					</div>
 				</div>
 			</div>
-			{ createdBy.username === username &&
+			{ isAdmin &&
 			<div className={classes.critical}>
-				<FormLabel component="legend">Who can edit group info</FormLabel>
-        <RadioGroup aria-label="group-info" name="info" value={value} onChange={({target}) => handleRadioChange(target.value)}>
-          <FormControlLabel value="admins" control={<Radio />} label="Admins only"  />
-          <FormControlLabel value="all" control={<Radio />} label="All participants"  />
-        </RadioGroup>
+				<legend>Who can edit group info</legend>
+
+				<div>
+					<input type="radio" id='admins' name='settings' checked={
+						settings.allowEditForAdminsOnly 
+					} onChange={e => handleRadioChange(e.target.id)} />
+					<label htmlFor="admins">Admins</label>
+				</div>
+				<div>
+					<input type="radio" id='all' name='settings' checked={
+						!settings.allowEditForAdminsOnly 
+					} onChange={e => handleRadioChange(e.target.id)} />
+					<label htmlFor="all">All participants</label>
+				</div>
       </div>
     	}
 		</div>

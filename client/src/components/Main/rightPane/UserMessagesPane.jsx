@@ -30,6 +30,7 @@ import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 import FileCopyOutlinedIcon from '@material-ui/icons/FileCopyOutlined'
 import DeleteSweepIcon from '@material-ui/icons/DeleteSweep';
+import PermIdentityIcon from '@material-ui/icons/PermIdentity';
 import ReplyIcon from '@material-ui/icons/Reply'
 
 import common from '@material-ui/core/colors/common';
@@ -51,7 +52,7 @@ import {
 	fetchUserProfile,
 	handleReply,
 	setSelectedChat,
-	setProfile
+	setUserProfile
 } from '../../../Redux/features/chatSlice'
 
 import { setTypingStatus, handleAlert } from '../../../Redux/features/otherSlice'
@@ -138,7 +139,7 @@ const LS = (str) => {
 	return JSON.parse(localStorage.getItem(str))
 }
 
-const UserMessagesPane = ({friend, typingStatus, onlineStatus, lastSeen, isSelectedUser}) => {
+const UserMessagesPane = ({friend, typingStatus, onlineStatus, lastSeen}) => {
 	const classes = useStyles()
 
 	const dispatch = useDispatch()
@@ -274,7 +275,7 @@ const UserMessagesPane = ({friend, typingStatus, onlineStatus, lastSeen, isSelec
 	const handleError = (info) => dispatch(handleAlert(info))
 
 	const sendMessage = async () => {
-		typingStatus && handleTypingStatus(false)
+		typing && handleTypingStatus(false)
 		const textarea = inputRef.current.querySelector('textarea')
 		if (textarea.value.replaceAll(' ', '') === '') {
 			return false
@@ -338,10 +339,6 @@ const UserMessagesPane = ({friend, typingStatus, onlineStatus, lastSeen, isSelec
 		}
 	}, [selectedChat])
 
-	const showProfilePage = () => {
-	}
-
-
 	const closeActions = () => {
 		dispatch(setSelectedChat({}))
 	}
@@ -367,18 +364,14 @@ const UserMessagesPane = ({friend, typingStatus, onlineStatus, lastSeen, isSelec
 			friendsName: friend.username
 		}))
 	}
-	
 
+	const handleUserProfile = () => dispatch(setUserProfile(true))
 
 	return (
-		<div className={classes.UserMessagesPane} style={{
-			display: isSelectedUser ? 'flex' : 'none'
-		}} >
-		
 		<BaseCard>
 			<CardHeader
         avatar={
-          <div onClick={showProfilePage}>
+          <div onClick={handleUserProfile}>
 				    
 	          <UserAvatar 
 				      username={friend.username} 
@@ -387,7 +380,12 @@ const UserMessagesPane = ({friend, typingStatus, onlineStatus, lastSeen, isSelec
 				    />
 				   </div>
         }
-        title={<span onClick={showProfilePage}> {friend.username} </span>}
+         action={
+        	<IconButton onClick={handleUserProfile} >
+        		<PermIdentityIcon />
+        	</IconButton>
+        }
+        title={<span onClick={handleUserProfile}> {friend.username} </span>}
         subheader={
         	typingStatus ? <TypingSignal /> :
         		secondaryText
@@ -508,7 +506,6 @@ const UserMessagesPane = ({friend, typingStatus, onlineStatus, lastSeen, isSelec
     	</CardActions>
 
 		</BaseCard>
-		</div>
 	)
 }
 

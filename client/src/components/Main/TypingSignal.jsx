@@ -7,7 +7,7 @@ const useStyles = makeStyles({
 		display: 'flex',
 		alignItems: 'center',
 		fontSize: '.91rem',
-		height: '16px',
+		height: '20px',
 
 		'& > div': {
 			marginLeft: '8px'

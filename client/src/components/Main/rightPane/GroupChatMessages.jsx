@@ -363,7 +363,7 @@ const ChatsByDate = ({chat}) => {
 								return (
 									<div key={i} className={[classes.alert, classes.chatNotifier].join(' ')}>
 										<span> 
-											{message.message.replaceAll(` ${username} `, ' You ')}
+    									{message.message.split(' ').map(i => i.replaceAll(username, 'You')).join(' ')}
 										<span > {message.timestamp.time} </span>
 										</span>
 									</div>

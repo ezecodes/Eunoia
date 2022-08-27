@@ -13,14 +13,10 @@ const initialState = {
 		showLoader: true,
 		...JSON.parse(localStorage.getItem('details')),
 		socketId: '',
-		online: '',
+		online: false,
 		bio: '',
 		socials: [],
 		createdGroups: [],
-		settings: JSON.parse(localStorage.getItem('settings')) || {
-			notifications: true,
-			sound: true,
-		}
 	}
 }
 
@@ -31,11 +27,6 @@ const accountSlice = createSlice({
 		setOnline: (state, action) => {
 			state.account.online = action.payload
 		},
-		updateSettings: (state, action) => {
-			const payload = action.payload
-			state.account.settings = {...state.account.settings, ...payload}
-			localStorage.setItem('settings', JSON.stringify(state.account.settings))
-		},
 		setNewSocial: (state, action) => {
 			const newSocial = action.payload
 			const find = state.account.socials.findIndex(i => i.name === newSocial.name)
@@ -45,7 +36,6 @@ const accountSlice = createSlice({
 			} else {
 				state.account.socials[find] = newSocial
 			}
-			localStorage.setItem('socials', JSON.stringify({ ...state.account.socials, ...action.payload}))
 
 		},
 		handleDeleteSocial: (state, action) => {
@@ -66,12 +56,15 @@ const accountSlice = createSlice({
 			state.account = {...state.account, ...action.payload}
 			state.account.showLoader = false
 		})
+		.addCase(fetchAccountData.rejected, () => {
+			localStorage.clear()
+			document.location = '/'
+		})
 	}
 
 })
 
 export const {
-	updateSettings,
 	setNewSocial,
 	setOnline,
 	handleDeleteSocial,

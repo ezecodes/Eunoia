@@ -54,7 +54,7 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 
 import { setComponents} from '../../../../Redux/features/componentSlice'
-import { updateSettings, editAccountInfo} from '../../../../Redux/features/accountSlice'
+import { editAccountInfo} from '../../../../Redux/features/accountSlice'
 
 import UserAvatar from '../../UserAvatar'
 import Header from '../../Header'
@@ -189,7 +189,7 @@ const Settings = ({className}) => {
 	const {id} = JSON.parse(localStorage.getItem('details'))
 	const classes = useStyles()
 	const dispatch = useDispatch()
-	const { username, displayName, bio, status, email, settings} = useSelector(state => state.account.account)
+	const { username, displayName, bio, status, email, notifications} = useSelector(state => state.account.account)
 	const [showProgress, setProgress] = React.useState(false)
 
 	const [showInput, setInputs] = React.useState({name: false, bio: false})
@@ -292,24 +292,16 @@ const Settings = ({className}) => {
 	
 	
 
-	const handleSettings = (obj) => {
+	const handleNotification = (obj) => {
 		setProgress(true)
-		handleFetch(`/account/updateSettings/${id}`, 'put', {obj: obj}, (res) => {
-			dispatch(updateSettings(res))
-			setProgress(false)
-		})
-	}
-
-	const changeBio = () => {
-		setInputs({bio: false})
-		if (bioInput !== '') {
-			setProgress(true)
-
-			handleFetch(`/account/editBio/${id}`, 'put', {bio: bioInput}, (res) => {
-				setProgress(false)
+		handleFetch(
+			`/account/setNotify/${id}`,
+			 'put', 
+			 {update: obj}, 
+			 (res) => {
 				dispatch(editAccountInfo(res))
+				setProgress(false)
 			})
-		}
 	}
 	const callToLogout = () => {
 		localStorage.clear()
@@ -416,19 +408,19 @@ const Settings = ({className}) => {
 			      }
 					>
 	          <ListItem button
-	          	onClick={() => handleSettings({notifications: !settings.notifications})} >
+	          	onClick={() => handleNotification({...notifications, notify: !notifications.notify})} >
 	            <ListItemText primary="Notification" />
 	            <Switch 
-	            	checked={settings.notifications}
+	            	checked={notifications.notify}
 	            	color='primary'
 	            />
 	          </ListItem>
 	          <ListItem  button
-	          	onClick={() => handleSettings({sound: !settings.sound})}
+	          	onClick={() => handleNotification({...notifications, sound: !notifications.sound})}
 	          >
 	            <ListItemText primary="Sound" />
             	<Switch 
-            		checked={settings.sound}
+            		checked={notifications.sound}
             		color='primary'
             	/>
 	          </ListItem>

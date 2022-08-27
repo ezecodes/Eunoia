@@ -204,7 +204,7 @@ const Form = () => {
 							disabled ? 
 								<>
 									Register &nbsp;&nbsp;
-									<Preloader use={Oval} size={20} strokeWidth={10} strokeColor='#fff' duration={1000} /> 
+									<Preloader use={Oval} size={20} strokeWidth={10} strokeColor='#fff' duration={700} /> 
 								</>
 							: 'Register'
 						}

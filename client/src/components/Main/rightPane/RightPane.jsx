@@ -35,7 +35,7 @@ const useStyles = makeStyles({
 			// display: 'none'
 		},
 	},
-	groupSec: {
+	panes: {
 		height: '100%',
 		display: 'flex',
 		overflow: 'hidden',
@@ -95,6 +95,7 @@ const RightPane = ({user}) => {
 			{
 				assert(groupChats) &&
 				groupChats.map((groupChat, i) => {
+
 					const isCurrentSelected = () => {
 						if (assert(selectedGroup) && selectedGroup._id === groupChat._id) {
 							return true
@@ -102,14 +103,13 @@ const RightPane = ({user}) => {
 					}
 				
 					return (
-						<div className={classes.groupSec} key={groupChat._id} style={{
+						<div className={classes.panes} key={groupChat._id} style={{
 							display: isCurrentSelected() ? 'flex' : 'none'
 						}} >
 							<GroupMessagesPane {...groupChat} isCurrentSelected={isCurrentSelected()}  />
 
 							{ gRoot &&
 				      	<GroupInfo
-				      		className={classes.gInfo}
 					      	{...groupChat}
 					      />
 					    }
@@ -125,8 +125,8 @@ const RightPane = ({user}) => {
 
 				      { gSettings &&
 				      	<GroupSettings 
-				      		className={classes.gInfo}
 					      	_id={groupChat._id}
+					      	isAdmin={groupChat.admins.some(i => i.username === username)}
 					      	name={groupChat.name}
 					      	description={groupChat.description}
 					      	createdBy={groupChat.createdBy}
@@ -150,22 +150,28 @@ const RightPane = ({user}) => {
 								return true
 							} else return false
 						}
-						const computedProps = {
-							...userInAll(),
-							isSelectedUser: isSelectedUser()
-						}
+						
 						return (
-							<UserMessagesPane 
-								key={i} 
-								friend={friend} 
-								{...computedProps}
-							/>
+							<div className={classes.panes} key={i} 
+								style={{
+									display: isSelectedUser() ? 'flex' : 'none'
+								}}
+							>
+								<UserMessagesPane 
+									key={i} 
+									friend={friend} 
+									typingStatus={userInAll().typing}
+									onlineStatus={userInAll().online}
+									lastSeen={userInAll().lastSeen}
+								/>
 
-							showUserProfile && isSelectedUser() &&
-							<UserProfile 
-								{...friend}
-								{...computedProps}
-							/>
+								{showUserProfile && isSelectedUser() &&
+									<UserProfile 
+										{...friend}
+										{...userInAll()}
+									/>
+								}
+							</div>
 						)
 					})
 			}

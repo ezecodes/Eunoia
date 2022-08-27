@@ -46,7 +46,7 @@ import {
 	deleteGroup
 } from '../../../Redux/features/groupSlice'
 
-import { assert, handleFetch } from '../../../lib/script'
+import { assert, handleFetch, retrieveDate } from '../../../lib/script'
 
 import emit from '../../../sockets/outgoing'
 
@@ -168,6 +168,19 @@ const RecentChats = ({className}) => {
 	}
 
 	const handleGroupDelete = () => {
+		emit(
+			'removeGroupUser', 
+			{
+				_id: groupToBeDeleted, 
+				username, 
+				message: {
+					type: 'alert',
+					chatId: new Date().getTime() ,
+					message: `${username} left the group`,
+					timestamp: retrieveDate()
+				}
+			}
+		)
 		handleFetch(
 			`chat/deleteGroup/${id}/${groupToBeDeleted}`,
 			'delete'

@@ -15,8 +15,6 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import Divider from '@material-ui/core/Divider';
 import ListSubheader from '@material-ui/core/ListSubheader';
 import Badge from '@material-ui/core/Badge';
-import Snackbar from '@material-ui/core/Snackbar'
-import MuiAlert from '@material-ui/lab/Alert';
 
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import GroupIcon from '@material-ui/icons/Group'
@@ -291,7 +289,6 @@ function GroupInfo({participants, _id, name, description, show, createdBy, admin
 	const accountName = useSelector(state => state.account.account.username)
 	const id = useSelector(state => state.account.account.id)
 	const [open, setOpen] = React.useState(false)
-	const [message, setMessage] = React.useState('')
 	const activeUsers = useSelector(state => state.activeUsers.activeUsers)
 	participants = participants.filter((i) => i).sort((a, b) => {
 		if (a.username === createdBy.username && b.username !== createdBy.username) {
@@ -318,16 +315,12 @@ function GroupInfo({participants, _id, name, description, show, createdBy, admin
 	}
 
 	const assignAdmin = (username) => {
-		if (createdBy.username === username) {
-			setOpen(true)
-			setMessage('You can\'t edit your admin role as the group creator')
-		} else {
-			emit('addAdmin', id, {_id, username})
-		}
+		emit('addAdmin', {_id, username})
+		
 	}
 
 	const blockGroupUser = username => {
-		if (!admins.some(i => i.username === username)) return
+		if (!admins.some(i => i.username === accountName)) return
 		const _date = new Date()
 		const dateNow = () => _date.getTime()
 		const thisDate = dateNow()
@@ -398,7 +391,7 @@ function GroupInfo({participants, _id, name, description, show, createdBy, admin
 			      }
 					>
 					{
-						accountName === createdBy.username ?
+						admins.some(i => i.username === accountName) ?
 							participants.map((user, i) => {
 
 								const userInActive = activeUsers.find(i => i.username === user.username) || {}
@@ -442,21 +435,6 @@ function GroupInfo({participants, _id, name, description, show, createdBy, admin
 			</div>
 
 		</Slide>
-		<Snackbar 
-			className={classes.bottomSnackbar}
-			anchorOrigin={{
-				vertical: 'bottom',
-				horizontal: 'center',
-			}}
-			// autoHideDuration={2000} 
-			message={message}
-			open={open}
-			onClose={closeAlert}
-		>
-			<MuiAlert variant='filled' elevation={6} onClose={closeAlert} severity="info">
-		    {message}
-		  </MuiAlert>
-		</Snackbar>
 		</>
 	)
 }

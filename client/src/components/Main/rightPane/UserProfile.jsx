@@ -20,6 +20,7 @@ import Typography from '@material-ui/core/Typography';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
+import Slide from '@material-ui/core/Slide';
 
 import Backdrop from '@material-ui/core/Backdrop';
 
@@ -47,7 +48,6 @@ const useStyles = makeStyles({
 	},
 	body: {
 		padding: '26px 20px 0 20px',
-		textAlign: 'center'
 	},
 	banner: {
 		display: 'flex',
@@ -55,35 +55,71 @@ const useStyles = makeStyles({
 	},
 	profileContacts: {
 		marginTop: '1.1rem',
-		'& .MuiTypography-body1:first-child': {
-			fontSize: '1.2rem',
-			fontWeight: 'bold',
-			marginBottom: '.2rem'
+		display: 'flex',
+		flexDirection: 'column',
+		alignItems: 'center',
+
+		'& > div:first-child .MuiTypography-body1': {
+			fontWeight: 'bold'
 		},
-		'& .MuiTypography-body1:last-of-type': {
-			fontSize: '1.05rem',
-			lineHeight: 1.3
-		}	
+		'& > div:last-of-type': {
+			marginTop: '14px'
+		},
+
+		'& > div': {
+			width: '100%',
+			display: 'flex',
+			alignItems: 'center',
+			paddingBottom: '5px',
+
+			'& .MuiSvgIcon-root': {
+				// fontSize: '1.4rem',
+				marginRight: '5px',
+				color: '#595a5aab'
+			},
+
+			'& .MuiTypography-body1': {
+				textAlign: 'left'
+			}
+		}
+		// '& .MuiTypography-body1:first-child': {
+		// 	fontSize: '1.2rem',
+		// 	fontWeight: 'bold',
+		// 	marginBottom: '.2rem'
+		// },
+		// '& .MuiTypography-body1:last-of-type': {
+		// 	fontSize: '1.05rem',
+		// 	lineHeight: 1.3
+		// }	
 	},
 	socials: {
 		marginTop: '1rem',
-		display: 'flex',
-		flexWrap: 'wrap',
-		justifyContent: 'center',
-		"& > a:hover": {
-			textDecoration: 'underline'
+
+		'& > h4': {
+			fontSize: '.8rem',
+			textTransform: 'uppercase',
+			marginBottom: '5px',
+			fontWeight: 'normal !important'
 		},
-		'& > a': {
-			margin: '5px 7px 0',
+
+		'& > div': {
 			display: 'flex',
-			justifyContent: 'center',
-			alignItems: 'center',
-			transition: '.6s ease all',
-			'& svg': {
-				marginRight: '.3rem',
-				fontSize: '1.6rem'
-			}
-		},
+			flexWrap: 'wrap',
+			"& > a:hover": {
+				textDecoration: 'underline'
+			},
+			'& > a': {
+				margin: '5px 7px 0',
+				display: 'flex',
+				justifyContent: 'center',
+				alignItems: 'center',
+				transition: '.6s ease all',
+				'& svg': {
+					marginRight: '.3rem',
+					fontSize: '1.6rem'
+				}
+			},
+		}
 	},
 	backdrop: {
 		width: '100%',
@@ -101,21 +137,21 @@ const actions = [
 ]
 
 
-const UserProfile = ({username, displayName, joined}) => {
+const UserProfile = ({username, displayName, joined, bio, socials}) => {
 	const dispatch = useDispatch()
 	const classes = useStyles()
 	const {id} = JSON.parse(localStorage.getItem('details'))
 
 	const setComp = (obj) => {
-		dispatch(setProfile({friendsName: profile.username, open: false}))
+		dispatch(setUserProfile(false))
 	}
 
   const handleCall = () => {
 
   }
 	return (
-		<><div className={classes.backdrop} onClick={setComp} > </div>
-		<section className={[classes.profilePage, 'animate__animated', 'animate__fadeInRight'].join(' ')} 
+		<Slide in={true} direction='left'>
+		<div className={[classes.profilePage, 'animate__animated', 'animate__fadeInRight'].join(' ')} 
 			style={{height: `${getWindowHeight()}px`}}
 		>
 			<Header>
@@ -127,33 +163,42 @@ const UserProfile = ({username, displayName, joined}) => {
 
 			<div className={classes.body}>
 				<div className={classes.banner}>
-					<UserAvatar username={profile.username} style={{
+					<UserAvatar username={username} style={{
 		        	width: 200, height: 200, fontSize: '4rem'
 		        }} badge={false} />
 		    </div>
 
 		    <div className={classes.profileContacts}>
-		    	<Typography> {profile.username}</Typography>
-		      {profile.bio !== '' &&
-			      <Typography> {profile.bio} </Typography>
-			    }
+		    	<div>
+		    		{/*<PersonPinIcon />*/}
+		    		<Typography> @{username}</Typography>
+		    	</div>
+		    	<div>
+		    		<InfoOutlinedIcon />
+		    		<Typography>{bio}</Typography>
+		    	</div>
 
 		    </div>
+		    {socials.length > 0 && socials &&
 		    <div className={classes.socials}>
-		    	{
-		    		profile.socials.map((social, i) => {
-		    			const find = actions.find(action => action.name === social.name)
-		    			return (
-		    				find !== undefined &&
-		    					<a href={social.link} rel='noreferrer' target='_blank'>
-		    						{find.icon} {social.link} 
-		    					</a>	
-		    			)
-		    		})
-		    	}
-		    </div>
+		    	<h4>Social handles</h4>
+		    	<div>
+			    	{
+			    		socials.map((social, i) => {
+			    			const find = actions.find(action => action.name === social.name)
+			    			return (
+			    				find !== undefined &&
+			    					<a href={social.link} rel='noreferrer' target='_blank'>
+			    						{find.icon}
+			    					</a>	
+			    			)
+			    		})
+			    	}
+			    </div>
+		    </div>}
 			</div>
-		</section></>
+		</div>
+		</Slide>
 	)
 }
 

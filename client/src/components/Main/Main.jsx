@@ -71,9 +71,9 @@ const Main = () => {
 		init({token: id, username})
 
 		// emit 'getOnlineUsers after fetch to prevent conflict'
+		dispatch(fetchAccountData(id))
 		dispatch(fetchRecentChats(id)).then(() => socket.emit('getOnileUsers'))
 		dispatch(fetchActiveUsers(id)).then(() => socket.emit('getOnileUsers'))
-		dispatch(fetchAccountData(id))
 	}, [])
 
 	socket.off('connect').on('connect', () => {
@@ -104,29 +104,26 @@ const Main = () => {
 		dispatch(fetchGroupInfo({token: id, _id}))
 	})
 
-	socket.off('getUpdatedGroupField').on('getUpdatedGroupField', ({_id, field}) => {
-		console.log(_id, field)
-		handleFetch(
-			`chat/fetchUpdatedGroupField/${id}/${_id}`,
-			'get',
-			{field},
-			res => {
-				dispatch(setUpdatedField({_id, res}))
-			}
-		)
+	socket.off('setGroupSettings').on('setGroupSettings', ({_id, settings}) => {
+		dispatch(setUpdatedField({_id, field: {settings}}))
 	})
-
-	// socket.off('addedGroup').on('addedGroup', (groupId) => {
-	// 	dispatch(fetchSpecificField({token: id, groupId}))
-	// })
-	
-	// socket.off('updateGroupInRecent').on('updateGroupInRecent', (groupId) => {
-	// 	dispatch(fetchSpecificField({token: id, groupId}))
-	// })
-	
-	// socket.off('leaveGroup').on('leaveGroup', (groupId) => {
-	// 	dispatch(fetchSpecificField({token: id, groupId}))
-	// })
+	socket.off('setGroupDesc').on('setGroupDesc', ({_id, description}) => {
+		dispatch(setUpdatedField({_id, field: {description}}))
+	})
+	socket.off('setGroupName').on('setGroupName', ({_id, name}) => {
+		dispatch(fetchGroupInfo({token: id, _id}))
+		dispatch(setUpdatedField({_id, field: {name}})) 
+	})
+	socket.off('setGroupAdmins').on('setGroupAdmins', ({_id, admins}) => {
+		dispatch(setUpdatedField({_id, field: {admins}})) 
+	})
+	socket.off('addGroupParticipants').on('addGroupParticipants', ({_id, participants}) => {
+		dispatch(fetchGroupInfo({token: id, _id}))
+		dispatch(setUpdatedField({_id, field: {participants}}))
+	})
+	socket.off('removeGroupUser').on('removeGroupUser', ({_id, participants, admins}) => {
+		dispatch(setUpdatedField({_id, field: {participants, admins}}))
+	})
 
 	socket.off('chatFromGroup').on('chatFromGroup', ({_id, chat}) => {
 		dispatch(storeReceivedGroupChat({_id, chat}))

@@ -172,8 +172,7 @@ function GroupList ({
 	}
 	const handleDispatch = () => {
 		dispatch(setSelectedGroup({_id}))
-		userIsSelected && 
-			dispatch(setSelectedUser({}))
+		userIsSelected && dispatch(setSelectedUser({}))
 		setPane()
 	}
 
@@ -240,7 +239,7 @@ function GroupList ({
 			  				<span className={[classes.lastGroupChat].join(' ')}> 
     							{
     								(lastChat.type && lastChat.type === 'alert') ?
-						    			lastChat.message.replaceAll( ` ${username} ` , ' You ')
+    									lastChat.message.split(' ').map(i => i.replaceAll(username, 'You')).join(' ')
 					    			:
 									 	<>
 										 	<span>

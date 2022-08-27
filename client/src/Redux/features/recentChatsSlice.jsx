@@ -272,7 +272,7 @@ const recentChatsSlice = createSlice({
 			
 			state.recentChats.forEach((a, i) => {
 				if (a.chatType === 'group') {
-					if (a.group.groupName.toLowerCase().includes(input.toLowerCase())) {
+					if (a.name.toLowerCase().includes(input.toLowerCase())) {
 						state.recentChats[i].visible = true
 					} else {
 						state.recentChats[i].visible = false

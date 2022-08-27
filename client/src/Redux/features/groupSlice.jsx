@@ -217,10 +217,10 @@ const groupSlice = createSlice({
 		},
 
 		setUpdatedField: (state, action) => {
-			const {_id, groupChats} = action.payload
+			const {_id, field} = action.payload
 			const find = state.groupChats.findIndex(i => i._id === _id)
 			if (find !== -1) {
-				state.groupChats[find] = {...state.groupChats[find], ...groupChats}
+				state.groupChats[find] = {...state.groupChats[find], ...field}
 			}
 
 		}
