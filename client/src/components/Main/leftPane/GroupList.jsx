@@ -99,7 +99,8 @@ const useStyles = makeStyles({
 	},
 	lastGroupChat: {
 		'& > span:first-child': {
-			color: '#ff845d'
+			color: '#565d68',
+			fontWeight: 'bold'
 		},
 		'& > span:last-of-type': {
 			color: '#9d9d9d'
@@ -243,9 +244,9 @@ function GroupList ({
 					    			:
 									 	<>
 										 	<span>
-										 		{lastChat.sender.replaceAll(username, 'You')}
+										 		{lastChat.sender.replaceAll(username, 'You: ')}
 										 	</span>
-										 	<span>: {lastChat.message} </span>
+										 	<span>{lastChat.message} </span>
 									 	</>
 									}
 			  				</span>
