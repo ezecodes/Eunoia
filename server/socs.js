@@ -161,13 +161,9 @@ user.on('connection', socket => {
 
 	socket.on('removeGroupUser', ({_id, username, message}) => {
 		emitToGroup({_id, evt: 'chatFromGroup', body: {_id, chat: message}})
-		
+
 		groupsUtil.removeGroupUser({_id, username, message}, (participants, admins) => {
-			groupSession.appendGroup({_id, participants})
-
-			// the removed user fetches the updated group info
-			emit({name: username, evt: 'fetchGroupInfo', body: {_id}})
-
+			
 			// participants also gets the updated group fields - (participants, admins)
 			emitToGroup({
 				_id,
@@ -178,6 +174,11 @@ user.on('connection', socket => {
 					_id
 				}
 			})
+			groupSession.appendGroup({_id, participants})
+
+			// the removed user fetches the updated group info
+			emit({name: username, evt: 'fetchGroupInfo', body: {_id}})
+			
 		})
 	})
 
