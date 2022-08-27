@@ -66,6 +66,7 @@ import HelperAlert from '../../HelperAlert'
 import UserChatMessages from './UserChatMessages'
 import UserAvatar from '../UserAvatar'
 import ReplyHandle from './ReplyHandle'
+import MessageInput from './MessageInput'
 import BaseCard from './BaseCard'
 import ChatActions from '../ChatActions'
 import TypingSignal from '../TypingSignal'
@@ -170,6 +171,7 @@ const UserMessagesPane = ({friend, typingStatus, onlineStatus, lastSeen}) => {
 
 	const [typing, setTyping] = React.useState(false)
 	const [pos, setPos] = React.useState({})
+	const [inputValue, setInput] = React.useState('')
 
 	const [secondaryText, setText] = React.useState('')
 
@@ -217,13 +219,6 @@ const UserMessagesPane = ({friend, typingStatus, onlineStatus, lastSeen}) => {
 		}	
 	}, [pendingDelete])
 
-	React.useEffect(() => {
-		const textarea = inputRef.current.querySelector('textarea')
-		if (reply.open) {
-			textarea.focus()
-		}
-	}, [reply])
-
 	const undoDelete = () => {
 		dispatch(undoPendingDelete({friendsName: friend.username}))
 		clearTimeout(timerToDelete)
@@ -246,9 +241,8 @@ const UserMessagesPane = ({friend, typingStatus, onlineStatus, lastSeen}) => {
 		dispatch(handleStarredChat({starredChat: {}, friendsName: friend.username}))
 	}
 
-	const handleTextInput = (e) => {
-		// setInput(e.target.value)
-
+	const handleTextInput = (value) => {
+		setInput(value)
 		clearTimeout(timer)
 
 		const newTimer = setTimeout( async () => {
@@ -260,13 +254,6 @@ const UserMessagesPane = ({friend, typingStatus, onlineStatus, lastSeen}) => {
 		setTimer(newTimer)
 	}
 
-	const listenForEnter = (e) => {
-		if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey) {
-			e.preventDefault()
-			sendMessage()
-		}
-	}
-
 	const closeReplyHandle = () => {
 		dispatch(setReply({open: false, friendsName: friend.username}))
 	}
@@ -274,13 +261,15 @@ const UserMessagesPane = ({friend, typingStatus, onlineStatus, lastSeen}) => {
 
 	const handleError = (info) => dispatch(handleAlert(info))
 
-	const sendMessage = async () => {
+	const sendMessage = () => {
 		typing && handleTypingStatus(false)
-		const textarea = inputRef.current.querySelector('textarea')
-		if (textarea.value.replaceAll(' ', '') === '') {
-			return false
+		if (inputValue.replaceAll(' ', '') === '' ) {
+			return 
 		}
-		const input = textarea.value
+		if (!accountIsOnline) {
+			handleError({open: true})
+			return
+		}
 		const _date = new Date()
 		const dateNow = () => _date.getTime()
 		const thisDate = dateNow()
@@ -290,7 +279,7 @@ const UserMessagesPane = ({friend, typingStatus, onlineStatus, lastSeen}) => {
 			sender: username,
 			lastSent: thisDate,
 			message: {
-				message: input,
+				message: inputValue,
 				chatId: thisDate,
 				sender: username,
 				read: false,
@@ -300,17 +289,11 @@ const UserMessagesPane = ({friend, typingStatus, onlineStatus, lastSeen}) => {
 			}
 		}
 
-		if (accountIsOnline) {
-			textarea.value = ''
-			handleError({open: false})
-			
-			emit('sentChat', chatObj)
+		emit('sentChat', chatObj)
+		dispatch(storeSentChat(chatObj))
+		reply.open && closeReplyHandle()
+		setInput('')
 
-			dispatch(storeSentChat(chatObj))
-			reply.open && closeReplyHandle()
-		} else {
-			handleError({open: true})
-		}
 	}
 
 	const handleChatHighlight = () => {
@@ -322,15 +305,6 @@ const UserMessagesPane = ({friend, typingStatus, onlineStatus, lastSeen}) => {
 		}, 1500)
 
 		setHighlightTimer(newTimer)
-	}
-	
-	const handleInputClick = () => {
-		if (navigator.appVersion.indexOf('Win') !== -1 && LS('noOfDisplay') <= 1) {
-			// if (friend.messages.length === 1) {
-			// 	setHelperAlert(true)
-			// 	localStorage.setItem('noOfDisplay', LS('noOfDisplay') + 1)
-			// }
-		}
 	}
 
 	React.useEffect(() => {
@@ -413,7 +387,7 @@ const UserMessagesPane = ({friend, typingStatus, onlineStatus, lastSeen}) => {
 						<Button onClick={() => undoDelete()} style={{color: '#ffc4cf'}}> UNDO </Button>
 					}
 				/>
-				<Snackbar 
+				{/*<Snackbar 
 	    		open={showHelper}
 	    		onClose={closeHelper}
 			 		anchorOrigin={{
@@ -429,7 +403,7 @@ const UserMessagesPane = ({friend, typingStatus, onlineStatus, lastSeen}) => {
 	    				</span>
 				  </MuiAlert>
 				</Snackbar>
-
+*/}
 				{assert(selectedChat) && assert(pos) && 
 				<ChatActions 
 					open={assert(selectedChat)} 
@@ -482,26 +456,11 @@ const UserMessagesPane = ({friend, typingStatus, onlineStatus, lastSeen}) => {
       		closeReplyHandle={closeReplyHandle} 
       		handleChatHighlight={handleChatHighlight}
       	/>
-      	<InputBase
-      		multiline
-      		placeholder='Type your messages'
-      		ref={inputRef}
-      		className={classes.inputBase}
-      		onChange={() => onlineStatus && handleTextInput()}
-      		onKeyDown={listenForEnter}
-      		maxRows={4}
-      		minRows={1}
-      		onClick={() => {
-      			friend.messages.length <= 1 && handleInputClick()
-      		}}
-      		endAdornment={
-						<InputAdornment position="end" style={{height: '100%'}}>
-							<IconButton onClick={sendMessage} >
-			      		<SendIcon style={{color: blue[500]}} />
-			      	</IconButton>
-						</InputAdornment>
-					}
-      	/>
+      	<MessageInput 
+    			handleTextInput={handleTextInput}
+    			value={inputValue}
+    			sendMessage={sendMessage}
+    		/>
 	      	
     	</CardActions>
 

@@ -344,11 +344,19 @@ function GroupInfo({participants, _id, name, description, show, createdBy, admin
 		dispatch(setComponents({component: 'gSettings', parent: 'gInfos'}))
 	}
 	const SettingsEle = () => {
-		return (
-			<IconButton onClick={showGroupSettings}> 
-				<SettingsIcon />
-			</IconButton>
-		)
+		if (participants.some(i => i.username === accountName)) {
+			if (!settings.allowEditForAdminsOnly || (settings.allowEditForAdminsOnly 
+				&& admins.some(i => i.username === accountName))) {
+
+				return (
+					<IconButton onClick={showGroupSettings}> 
+						<SettingsIcon />
+					</IconButton>
+				)
+			} 
+
+		}
+		return (<></>)
 	}
 	return (
 		<>
@@ -365,13 +373,7 @@ function GroupInfo({participants, _id, name, description, show, createdBy, admin
 							<PersonAddIcon />
 						</IconButton>
 					}
-					{settings.allowEditForAdminsOnly &&
-						admins.findIndex(i => i.username === accountName) !== -1 &&
-						<SettingsEle />
-					}
-					{!settings.allowEditForAdminsOnly &&
-						<SettingsEle />
-					}
+					<SettingsEle />
 				</div>
 				<div className={classes.banner}>
 					<div className={classes.infos}>

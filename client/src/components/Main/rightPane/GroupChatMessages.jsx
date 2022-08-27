@@ -126,7 +126,6 @@ const useStyles = makeStyles({
 		padding: '2px 0' ,
 		fontSize: '.8rem', 
 		fontWeight: 'bold',
-		marginLeft: '-3px'
 	},
 	myReply: {
 		padding: '3px 10px 7px 1px',

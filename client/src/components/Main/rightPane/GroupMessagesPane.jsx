@@ -6,16 +6,13 @@ import CardMedia from '@material-ui/core/CardMedia';
 import CardContent from '@material-ui/core/CardContent';
 import CardActions from '@material-ui/core/CardActions';
 import IconButton from '@material-ui/core/IconButton'
-import InputBase from "@material-ui/core/InputBase";
 import Typography from '@material-ui/core/Typography';
 import Snackbar from '@material-ui/core/Snackbar'
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Button from '@material-ui/core/Button'
-import InputAdornment from '@material-ui/core/InputAdornment';
 import { makeStyles } from '@material-ui/core/styles';
 import Avatar from '@material-ui/core/Avatar'
 
-import SendIcon from '@material-ui/icons/Send';
 import GroupIcon from '@material-ui/icons/Group'
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import ReplyIcon from '@material-ui/icons/Reply'
@@ -42,6 +39,7 @@ import { handleAlert } from '../../../Redux/features/otherSlice'
 import ChatActions from '../ChatActions'
 
 import BaseCard from './BaseCard'
+import MessageInput from './MessageInput'
 import HelperAlert from '../../HelperAlert'
 import TypingSignal from '../TypingSignal'
 import UserAvatar from '../UserAvatar'	
@@ -94,6 +92,7 @@ function ActionNotifier(props) {
   )
 }
 
+
 function GroupMessagesPane ({
 	_id, 
 	name,
@@ -126,6 +125,7 @@ function GroupMessagesPane ({
 	const [timer, setTimer] = React.useState(null)
 	const [isTyping, setTyping] = React.useState(false)
 	const [pos, setPos] = React.useState({})
+	const [inputValue, setInput] = React.useState('')
 
 	let typingArr = typing.filter(i => i.typing).map(i => i.username)
 
@@ -180,13 +180,9 @@ function GroupMessagesPane ({
 		
 		setTyping(bool)
 	}
-	const listenForEnter = (e) => {
-		if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey) {
-			e.preventDefault()
-			sendMessage()
-		}
-	}
-	const handleTextInput = (e) => {
+	
+	const handleTextInput = (value) => {
+		setInput(value)
 		clearTimeout(timer)
 
 		const newTimer = setTimeout(() => {
@@ -202,15 +198,12 @@ function GroupMessagesPane ({
 	}
 
 	const sendMessage = () => {
+		if (inputValue.replaceAll(' ', '') === '') return
 		if (!online) {
 			dispatch(handleAlert({open: true}))
 			return
 		}
 
-		const input = inputRef.current.querySelector('textarea')
-		if (input.value.replaceAll(' ', '') === '') {
-			return
-		}
 		const _date = new Date()
 		const dateNow = () => _date.getTime()
 		const thisDate = dateNow()
@@ -218,7 +211,7 @@ function GroupMessagesPane ({
 		const chatObj = {
 			_id,
 			chat: {
-				message: input.value,
+				message: inputValue,
 				chatId: thisDate,
 				sender: username,
 				timestamp: retrieveDate(),
@@ -226,24 +219,19 @@ function GroupMessagesPane ({
 			}
 		}
 		emit('chatFromGroup', chatObj)
-		handleTypingStatus(false)
-		input.value = ''
+
+		typing && handleTypingStatus(false)
 		reply.open &&
 		 dispatch(setReply({
 			_id,
 			open: false,
 		}))
+		setInput('')
 	}
 
 	const handleInfo = () => {
 		dispatch(setComponents({component: 'gRoot', parent: 'gInfos'}))
 	}
-
-	React.useEffect(() => {
-		if (reply.open) {
-			inputRef.current.querySelector('textarea').focus()
-		}
-	}, [reply])
 
 	React.useEffect(() => {
 
@@ -282,7 +270,6 @@ function GroupMessagesPane ({
 		}
 		
 	}
-
 	return (
 		<BaseCard>
 			<CardHeader
@@ -347,7 +334,7 @@ function GroupMessagesPane ({
 						}*/}
 					</div>
 					<div>
-					{participants.findIndex(i => i.username === username) !== -1  &&
+					{participants.some(i => i.username === username) &&
 						<IconButton onClick={() => {
 							handleReply()
 							closeActions()
@@ -396,28 +383,12 @@ function GroupMessagesPane ({
       		closeReplyHandle={closeReplyHandle} 
       		handleChatHighlight={handleChatHighlight}
       	/>
-      	{participants.findIndex(i => i.username === username) !== -1 ?
-      	<InputBase
-      		multiline
-      		placeholder='Type your messages'
-      		ref={inputRef}
-      		className={classes.inputBase}
-      		onChange={() => accountIsOnline && handleTextInput()}
-      		// onKeyDown={listenForEnter}
-      		maxRows={4}
-      		onKeyDown={listenForEnter}
-      		minRows={1}
-      		onClick={() => {
-      		}}
-      		endAdornment={
-						<InputAdornment position="end" style={{height: '100%'}}>
-							<IconButton onClick={sendMessage} >
-			      		<SendIcon color='primary' />
-			      	</IconButton>
-						</InputAdornment>
-					}
-      		// value={input}
-      	/>
+      	{participants.some(i => i.username === username) ?
+      		<MessageInput 
+      			handleTextInput={handleTextInput}
+      			value={inputValue}
+      			sendMessage={sendMessage}
+      		/>
       	: 
       	<div className={classes.noMember}>
       		<span> You can't interact with this group <br /> 
