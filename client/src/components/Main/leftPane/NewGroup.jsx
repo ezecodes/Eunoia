@@ -33,7 +33,7 @@ import { makeStyles } from '@material-ui/core/styles';
 
 import { setComponents} from '../../../Redux/features/componentSlice'
 import { addGroupUser, unselectUser} from '../../../Redux/features/groupSlice'
-import { addGroup } from '../../../Redux/features/recentChatsSlice'
+import { addGroup, fetchRecentChats } from '../../../Redux/features/recentChatsSlice'
 
 import { handleAlert } from '../../../Redux/features/otherSlice'
 
@@ -172,6 +172,7 @@ const NewGroup = ({className}) => {
 	const [users, setUsers] = useState(activeUsers)
 	const [dialog, setDialog] = useState(false)
 	const [groupName, setGroupName ]= useState('')
+	const [showCreateLoader, setLoader] = useState(false)
 	const [inputProps, setInputProps] = useState({
 		error: false, helperText: ''
 	})
@@ -230,8 +231,10 @@ const NewGroup = ({className}) => {
 				],
 				
 			}
-			emit('newGroup', groupInfo)
-			setComponent()
+			emit('newGroup', groupInfo, (v) => {
+				dispatch(fetchRecentChats(id))
+				setComponent()
+			})
 		} else {
 			setInputProps({error: true, helperText: 'Please enter a group name'})
 		}
@@ -243,6 +246,7 @@ const NewGroup = ({className}) => {
 			createGroup()
 		}
 	}
+
 	return (
 		<section className={[classes.groupUsers, className].join(' ')}>
 			<Header>
