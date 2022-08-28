@@ -344,7 +344,7 @@ const RecentChats = ({className}) => {
 		        <DialogTitle id="alert-dialog-title">{"Clear group conversation"}</DialogTitle>
 		        <DialogContent>
 		          <DialogContentText id="alert-dialog-description">
-		            {`This action will permanently clear your entire chat history with the selecetd group. Continue?`}
+		            {`This action will permanently clear your entire chat history with the seleceted group. Continue?`}
 		          </DialogContentText>
 		        </DialogContent>
 		        <DialogActions>
