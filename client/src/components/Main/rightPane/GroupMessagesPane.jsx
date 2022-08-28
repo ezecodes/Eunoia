@@ -219,7 +219,9 @@ function GroupMessagesPane ({
 			}
 		}
 		emit('chatFromGroup', chatObj)
-
+		storeSentGroupChat({
+			_id, chat: chatObj.chat
+		})
 		typing && handleTypingStatus(false)
 		reply.open &&
 		 dispatch(setReply({

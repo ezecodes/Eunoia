@@ -41,7 +41,7 @@ const userSchema = Schema({
 		type: Date
 	},
 	lastSeen: {
-		type: Number
+		type: Date
 	},
 	socials: [socialsSchema],
 	notifications: {

@@ -20,7 +20,7 @@ async function saveProfileInfo(req, res) {
 	const {displayName, bio} = await User.findByIdAndUpdate(id, {
 		displayName: newDisplayName,
 		bio: newBio
-	})
+	}, {new: true})
 
 	res.send({displayName, bio})
 }

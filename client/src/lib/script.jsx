@@ -79,20 +79,19 @@ export async function handleFetch(url = '', method = '', body = {}, callback = (
 }
 
 export function getLastSeen(timestamp) {
-	if (isNaN(timestamp) || !timestamp) return 'recently'
+	if (!timestamp) return 'recently'
 	let newDate = new Date()
 	let oldDate = new Date(timestamp)
 	let mins = oldDate.toLocaleTimeString('en-US', {hour12: false, hour: '2-digit', minute: '2-digit'})
-	if (typeof timestamp === 'number') {
-		if (oldDate.toDateString() === newDate.toDateString()) {
-			return mins
-		} else {
-			let dateStr = oldDate.toDateString()
-			let idx = (/[0-9](?=[0-9]{3})/).exec(dateStr)['index']
-			let day = dateStr.split('').splice(0, idx-1).join('')
+	
+	if (oldDate.toDateString() === newDate.toDateString()) {
+		return mins
+	} else {
+		let dateStr = oldDate.toDateString()
+		let idx = (/[0-9](?=[0-9]{3})/).exec(dateStr)['index']
+		let day = dateStr.split('').splice(0, idx-1).join('')
 
-			return day
-		}
+		return day
 	}
 }
 

@@ -47,6 +47,7 @@ function ChatActions({
    		open={open}
    		anchorEl={anchorEl} 
 			onClose={onClose}
+			elevation={2}
 			anchorOrigin={anchorOrigin || {
 		    vertical: 'center',
 		    horizontal: 'center',
@@ -63,6 +64,7 @@ function ChatActions({
 		:
 		<Popover 
    		open={open}
+   		elevation={2}
    		anchorReference="anchorPosition"
    		anchorPosition={anchorPosition} 
 			onClose={onClose}

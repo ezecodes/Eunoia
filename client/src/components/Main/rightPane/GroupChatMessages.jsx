@@ -158,8 +158,6 @@ const useStyles = makeStyles({
 			display: 'block',
 			margin: '1px 0'
 		},
-		'& > span:last-of-type': {
-		}
 	},
 	chatTime: {
 		fontSize: '.65rem',

@@ -320,9 +320,7 @@ const recentChatsSlice = createSlice({
 		.addCase(fetchGroupInfo.fulfilled, (state, action) => {
 			let modifiedGroup = action.payload
 
-			const find = state.recentChats.findIndex(i => i.chatType === 'group' && 
-				i._id === modifiedGroup._id
-			)
+			const find = state.recentChats.findIndex(i => i.chatType === 'group' && i._id === modifiedGroup._id)
 
 			if (find !== -1) {
 				state.recentChats[find] = {

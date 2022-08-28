@@ -19,6 +19,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import { Preloader, Oval } from 'react-preloader-icon'
 
 import { profileUpdate} from '../../../../Redux/features/accountSlice'
+import { handleAlert} from '../../../../Redux/features/otherSlice'
 
 import { handleFetch } from '../../../../lib/script'
 
@@ -106,7 +107,6 @@ const ProfileEditor = ({open}) => {
 	const [noSave, setDisabled] = useState(false)
 	const [preloader, setPreloader] = useState(false)
 	const [noInput, disableInput] = useState(false)
-	const [openAlert, setAlert] = useState({open: false, message: ''})
 
 	const [error, setError] = useState({
 		displayName: false, bio: false
@@ -167,12 +167,12 @@ const ProfileEditor = ({open}) => {
 			`/account/saveProfileInfo/${id}`, 
 			'put', 
 			{
-				displayName: values.displayName,
-				bio: values.bio
+				newDisplayName: values.displayName,
+				newBio: values.bio
 			}, 
 			(res) => {
 				dispatch(profileUpdate(res))
-				setAlert({open: true, message: 'Profile updated successfully'})
+				dispatch(handleAlert({open: true, severity: 'success', msg: 'Profile updated successfully'}))
 				setPreloader(false)
 				setDisabled(false)
 				disableInput(false)
@@ -181,9 +181,6 @@ const ProfileEditor = ({open}) => {
 		)
 	}
 
-	const closeAlert = () => {
-		setAlert({open: false, message: ''})
-	}
 
 	return (
 	 <>

@@ -66,8 +66,8 @@ const groupSlice = createSlice({
 		},
 
 		storeSentGroupChat: (state, action) => {
-			const {groupId, lastSent, chat} = action.payload
-			const find = state.groupChats.findIndex(i => i.groupId === groupId)
+			const {_id, chat} = action.payload
+			const find = state.groupChats.findIndex(i => i._id === _id)
 
 			if (find !== -1) {
 				state.groupChats[find].messages.push(chat)

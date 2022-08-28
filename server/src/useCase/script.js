@@ -3,8 +3,8 @@ const User = require('../models/User.js')
 const PrivateGroup = require('../models/PrivateGroup.js')
 
 const userUtil = {
-	setLastSeen: async (id) => {
-		await User.findOneAndUpdate({_id: id}, {lastSeen: Date.now()})
+	setLastSeen: async (username) => {
+		await User.findOneAndUpdate({username}, {lastSeen: new Date()})
 	},
 	confirmUser: async (id, cb) => {
 		if (!id) return 

@@ -40,7 +40,7 @@ const useStyles = makeStyles({
 		position: 'relative',
 		padding: 12,
 		'&.MuiListItem-root.Mui-selected': {
-			backgroundColor: '#e3e3e34d',
+			backgroundColor: '#efefef',
 			// backgroundColor: 'rgb(248 247 255)'
 		},
 		'&:hover': {

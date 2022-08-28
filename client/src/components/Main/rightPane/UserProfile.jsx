@@ -14,6 +14,8 @@ import FacebookIcon from '@material-ui/icons/Facebook'
 import InstagramIcon from '@material-ui/icons/Instagram'
 import LocalPhoneIcon from '@material-ui/icons/LocalPhone'
 import KeyboardArrowLeftIcon from '@material-ui/icons/KeyboardArrowLeft'
+import AccountCircleIcon from '@material-ui/icons/AccountCircle';
+import PermIdentityIcon from '@material-ui/icons/PermIdentity';
 
 import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
@@ -21,6 +23,7 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import Slide from '@material-ui/core/Slide';
+import Zoom from '@material-ui/core/Zoom';
 
 import Backdrop from '@material-ui/core/Backdrop';
 
@@ -36,16 +39,7 @@ import Header from '../Header'
 import { getWindowHeight } from '../../../lib/script'
 
 const useStyles = makeStyles({
-	profilePage: {
-		background: '#fff',
-		width: 350,
-		minWidth: 300,
-		height: '100%',
-		position: 'absolute',
-		right: 0,
-		zIndex: 200,
-		height: '100%'
-	},
+	
 	body: {
 		padding: '26px 20px 0 20px',
 	},
@@ -63,23 +57,26 @@ const useStyles = makeStyles({
 			fontWeight: 'bold'
 		},
 		'& > div:last-of-type': {
-			marginTop: '14px'
+			// marginTop: '5px'
 		},
 
 		'& > div': {
 			width: '100%',
 			display: 'flex',
 			alignItems: 'center',
-			paddingBottom: '5px',
+			paddingBottom: '13px',
 
 			'& .MuiSvgIcon-root': {
 				// fontSize: '1.4rem',
 				marginRight: '5px',
-				color: '#595a5aab'
+				color: '#595a5aab',
+				fontSize: '1.2rem'
 			},
 
 			'& .MuiTypography-body1': {
-				textAlign: 'left'
+				textAlign: 'left',
+				paddingLeft: '11px',
+				marginLeft: '5px',
 			}
 		}
 		// '& .MuiTypography-body1:first-child': {
@@ -108,12 +105,30 @@ const useStyles = makeStyles({
 			"& > a:hover": {
 				textDecoration: 'underline'
 			},
-			'& > a': {
-				margin: '5px 7px 0',
+			'& > span': {
+				margin: '7px 7px 0',
 				display: 'flex',
 				justifyContent: 'center',
 				alignItems: 'center',
+				textTransform: 'capitalize',
+				position: 'relative',
 				transition: '.6s ease all',
+
+				'& > span': {
+					position: 'absolute',
+					left: 0,
+					zIndex: '50',
+					background: '#fff',
+					padding: '10px',
+					boxShadow: '0px 0px 5px 0px #ababab',
+					borderRadius: '10px',
+
+					'& > a': {
+						textDecoration: 'underline',
+						color: '#294eb5'
+					}
+				},
+
 				'& svg': {
 					marginRight: '.3rem',
 					fontSize: '1.6rem'
@@ -141,6 +156,7 @@ const UserProfile = ({username, displayName, joined, bio, socials}) => {
 	const dispatch = useDispatch()
 	const classes = useStyles()
 	const {id} = JSON.parse(localStorage.getItem('details'))
+	const [cur, setCur] = React.useState('')
 
 	const setComp = (obj) => {
 		dispatch(setUserProfile(false))
@@ -149,11 +165,12 @@ const UserProfile = ({username, displayName, joined, bio, socials}) => {
   const handleCall = () => {
 
   }
+  const handleSocial = (name) => {
+  	setCur(name)
+  }
 	return (
 		<Slide in={true} direction='left'>
-		<div className={[classes.profilePage, 'animate__animated', 'animate__fadeInRight'].join(' ')} 
-			style={{height: `${getWindowHeight()}px`}}
-		>
+		<div style={{height: `${getWindowHeight()}px`}}>
 			<Header>
 				<IconButton onClick={() => setComp({component: 'profile', value: false})} >
 					<KeyboardArrowLeftIcon />
@@ -170,9 +187,16 @@ const UserProfile = ({username, displayName, joined, bio, socials}) => {
 
 		    <div className={classes.profileContacts}>
 		    	<div>
-		    		{/*<PersonPinIcon />*/}
+		    		<PermIdentityIcon />
 		    		<Typography> @{username}</Typography>
 		    	</div>
+		    	{
+		    		displayName !== '' &&
+		    		<div>
+			    		<PersonPinIcon />
+			    		<Typography> {displayName}</Typography>
+			    	</div>
+		    	}
 		    	<div>
 		    		<InfoOutlinedIcon />
 		    		<Typography>{bio}</Typography>
@@ -188,9 +212,15 @@ const UserProfile = ({username, displayName, joined, bio, socials}) => {
 			    			const find = actions.find(action => action.name === social.name)
 			    			return (
 			    				find !== undefined &&
-			    					<a href={social.link} rel='noreferrer' target='_blank'>
-			    						{find.icon}
-			    					</a>	
+			    					<span key={i} onMouseEnter={() => handleSocial(social.name)} onMouseLeave={() => handleSocial('')} >
+				    					{find.icon} {social.name}
+				    					<Zoom in={cur === social.name}>
+					    					<span>
+					    						Follow link <br />
+					    						<a href={social.link} rel='noreferrer' target='_blank' > {social.link} </a>
+					    					</span>
+					    				</Zoom>
+				    				</span>
 			    			)
 			    		})
 			    	}

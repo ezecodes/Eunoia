@@ -57,6 +57,7 @@ user.on('connection', socket => {
 	socket.on('disconnect', () => {
 		onlineUsers = onlineUsers.filter(i => i.username !== socket.username)
 		user.emit('userDisconnect', {username: socket.username})
+		userUtil.setLastSeen(socket.username)
 	})
 
 	socket.on('getOnileUsers', () => {
@@ -163,7 +164,7 @@ user.on('connection', socket => {
 		emitToGroup({_id, evt: 'chatFromGroup', body: {_id, chat: message}})
 
 		groupsUtil.removeGroupUser({_id, username, message}, (participants, admins) => {
-			
+
 			// participants also gets the updated group fields - (participants, admins)
 			emitToGroup({
 				_id,
