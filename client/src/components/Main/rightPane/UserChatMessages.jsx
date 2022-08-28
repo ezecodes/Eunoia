@@ -110,7 +110,7 @@ const useStyles = makeStyles({
 			display: 'block',
 		},
 		'& > span:first-child': {
-			paddingLeft: 3,
+			paddingLeft: '6px',
 			color: deepOrange[500],
 			paddingBottom: 3,
 			fontSize: '.8rem', 

@@ -15,7 +15,7 @@ const Loader = ({customStyle}) => {
 	const classes = useStyles()
 	return (
 		<section className={[classes.loader, customStyle].join(' ')}>
-			<Preloader use={Oval} size={25} strokeWidth={7} strokeColor='#000' duration={1800} />
+			<Preloader use={Oval} size={40} strokeWidth={10} strokeColor='#000' duration={1800} />
 		</section>
 	)
 }

@@ -26,6 +26,7 @@ import SupervisorAccountIcon from '@material-ui/icons/SupervisorAccount';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import SettingsIcon from '@material-ui/icons/Settings';
 import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline';
+import { Preloader as OvalLoader, Oval } from 'react-preloader-icon'
 
 import UserAvatar from '../UserAvatar'	
 import ChatActions from '../ChatActions'
@@ -50,6 +51,11 @@ const useStyles = makeStyles({
 		// opacity: .7
 	},
 
+	oval: {
+		'& path': {
+			stroke: '#ffffff59'
+		}
+	},
 	info: {
 		minWidth: '300px',
 		display: 'flex',
@@ -64,6 +70,8 @@ const useStyles = makeStyles({
 		width: '100%',
 		display: 'flex',
 		justifyContent: 'flex-end',
+		marginBottom: '10px',
+		marginTop: '5px',
 
 		'& .MuiIconButton-root': {
 			'& svg':{
@@ -133,10 +141,25 @@ const useStyles = makeStyles({
 	}
 })
 
+function UserLoader({loading, isAnAdmin}) {
+	const classes = useStyles()
+	return (<ListItemSecondaryAction>
+		<IconButton edge="end" aria-label="Group admin" title="Group admin">
+			{ loading ?
+					<OvalLoader className={classes.oval} use={Oval} size={20} strokeWidth={15} strokeColor='darkblue' duration={500} />
+				: isAnAdmin ? 
+      		<SupervisorAccountIcon color='primary' />
+      	: <></>
+			}
+    </IconButton>
+	</ListItemSecondaryAction>)
+}
+
 function ListsForNorminalUsers ({
 	isTheAccountOwner, 
 	username, 
 	bio, 
+	loading,
 	isAnAdmin, 
 	isGroupCreator
 }) {
@@ -170,13 +193,7 @@ function ListsForNorminalUsers ({
     		} 
     		secondary={bio || ''}
     	/>
-  		{ isAnAdmin &&
-  		<ListItemSecondaryAction>
-				<IconButton edge="end" aria-label="Group admin" title="Group admin">
-          <SupervisorAccountIcon color='primary' />
-        </IconButton>
-    	</ListItemSecondaryAction>
-    	}
+    	<UserLoader loading={loading} isAnAdmin={isAnAdmin} />
     </ListItem>
 	)
 }
@@ -186,6 +203,7 @@ function ListsForAdminsOnly ({
 	bio, 
 	isGroupCreator, 
 	isAnAdmin, 
+	loading,
 	isTheAccountOwner, 
 	assignAdmin, 
 	blockGroupUser
@@ -239,13 +257,7 @@ function ListsForAdminsOnly ({
     		} 
     		secondary={bio || ''}
     	/>
-    	{isAnAdmin &&
-  		<ListItemSecondaryAction>
-				<IconButton edge="end" aria-label="Group admin" title="Group admin" >
-          <SupervisorAccountIcon color='primary' />
-        </IconButton>
-    	</ListItemSecondaryAction>
-    	}
+    	<UserLoader loading={loading} isAnAdmin={isAnAdmin} />
     	
   	</ListItem>
   	{ !isTheAccountOwner &&
@@ -289,6 +301,7 @@ function GroupInfo({participants, _id, name, description, show, createdBy, admin
 	const accountName = useSelector(state => state.account.account.username)
 	const id = useSelector(state => state.account.account.id)
 	const [open, setOpen] = React.useState(false)
+	const [loading, setLoader] = React.useState('')
 	const activeUsers = useSelector(state => state.activeUsers.activeUsers)
 	participants = participants.filter((i) => i).sort((a, b) => {
 		if (a.username === createdBy.username && b.username !== createdBy.username) {
@@ -315,7 +328,8 @@ function GroupInfo({participants, _id, name, description, show, createdBy, admin
 	}
 
 	const assignAdmin = (username) => {
-		emit('addAdmin', {_id, username})
+		setLoader(username)
+		emit('addAdmin', {_id, username}, () => setLoader(''))
 		
 	}
 
@@ -336,7 +350,8 @@ function GroupInfo({participants, _id, name, description, show, createdBy, admin
 					message: `${accountName} removed ${username}`,
 					timestamp: retrieveDate()
 				}
-			}
+			},
+			() => {}
 		)
 	}
 	
@@ -401,6 +416,7 @@ function GroupInfo({participants, _id, name, description, show, createdBy, admin
 									<ListsForAdminsOnly 
 										key={i}
 										{...userInActive}
+										loading={loading === user.username}
 										username={user.username}
 										assignAdmin={username => assignAdmin(username)}
 										blockGroupUser={username => blockGroupUser(username)}
@@ -419,6 +435,7 @@ function GroupInfo({participants, _id, name, description, show, createdBy, admin
 								<ListsForNorminalUsers 
 									key={i}
 									{...userInActive}
+									loading={loading === user.username}
 									username={user.username}
 									isGroupCreator={createdBy.username === user.username ? true : false}
 									isTheAccountOwner={accountName === user.username ? true : false}

@@ -28,6 +28,7 @@ import KeyboardBackspaceIcon from '@material-ui/icons/KeyboardBackspace';
 import CheckIcon from '@material-ui/icons/Check'
 
 import Header from '../Header'
+import Loader from './Loader'
 import NetworkProgress from '../NetworkProgress'
 
 import { handleAlert } from '../../../Redux/features/otherSlice'
@@ -87,6 +88,7 @@ function GroupSettings({_id, name, description, settings, isAdmin}) {
 	const [showProgress, setProgress] = React.useState(false)
 	const nameRef = React.createRef(null)
 	const descRef = React.createRef(null)
+	const [loading, setLoader] = React.useState(false)
 
 	const closeComp = () => {
 		dispatch(setComponents({component: 'gRoot', parent: 'gInfos'}))
@@ -95,18 +97,23 @@ function GroupSettings({_id, name, description, settings, isAdmin}) {
 		setOpen(false)
 	}
 	const handleRadioChange = (value) => {
+		setLoader(true)
     emit('handleGroupSettings', {
     	_id,
     	settings: {
     		allowEditForAdminsOnly: value === 'admins' ? true : false
     	}
-    })
+    }, () => loaded('settings'))
     
   };
   const setErr = (val) => {
   	dispatch(handleAlert(val))
   }
-
+  function loaded(field) {
+  	setLoader(false)
+  	dispatch(handleAlert({open: true, msg: `Group ${field} updated successfully `, severity: 'success'}))
+  	closeComp()
+  }
   const saveName = () => {
 		const nameInput = nameRef.current.querySelector('input')
   	if (!online) {
@@ -118,13 +125,14 @@ function GroupSettings({_id, name, description, settings, isAdmin}) {
 		if (nameInput.value.match(/[0-9a-z]/ig) === null) {
 			nameInput.value = name
 			closeComp()
-			setErr({open: true, msg: 'Group name can\'t be empty', severity: 'info'})
+			setErr({open: true, msg: 'Group name can\'t be blank', severity: 'info'})
 			return false
 		}
   	const _date = new Date()
 		const dateNow = () => _date.getTime()
 		const thisDate = dateNow()
 
+		setLoader(true)
 		emit(
 			'editGroupName', 
 			{
@@ -136,7 +144,7 @@ function GroupSettings({_id, name, description, settings, isAdmin}) {
 					message: `${username} changed the group name`,
 					timestamp: retrieveDate()
 			},
-		})
+		}, () => loaded('name'))
 
   }
  
@@ -149,7 +157,7 @@ function GroupSettings({_id, name, description, settings, isAdmin}) {
   	}
 
 		if (descInput.value === description) return false
-		
+		setLoader(true)
 		const _date = new Date()
 		const dateNow = () => _date.getTime()
 		const thisDate = dateNow()
@@ -163,7 +171,7 @@ function GroupSettings({_id, name, description, settings, isAdmin}) {
 				message: `${username} changed the group description`,
 				timestamp: retrieveDate()
 			}
-		})
+		}, () => loaded('description'))
 	}
 
 	React.useEffect(() => {
@@ -174,7 +182,6 @@ function GroupSettings({_id, name, description, settings, isAdmin}) {
   	 (descRef.current.querySelector('textarea').value = description)
   	}
   }, [])
-	
 
 	return (
 		<>
@@ -185,7 +192,7 @@ function GroupSettings({_id, name, description, settings, isAdmin}) {
 				<KeyboardBackspaceIcon />
 			</IconButton>
 			<Typography component='h6'> Update Group Settings </Typography>
-			{ showProgress &&
+			{ loading &&
 				<NetworkProgress />
 			}
 		</Header>

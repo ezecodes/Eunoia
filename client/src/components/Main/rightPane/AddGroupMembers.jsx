@@ -29,6 +29,7 @@ import { handleAlert } from '../../../Redux/features/otherSlice'
 
 import UserAvatar from '../UserAvatar'
 import Header from '../Header'
+import NetworkProgress from '../NetworkProgress'
 import Preloader from '../../Preloader'
 import SearchBar from '../SearchBar'
 
@@ -152,9 +153,15 @@ const AddGroupMembers = ({activeUsers, participants, _id}) => {
 	const [selectedUsers, appendSelected] = React.useState([])
 	const group = useSelector(state => state.groups.selectedGroup)
 	const [searchTerm, setSearch] = React.useState('')
+	const [loading, setLoader] = React.useState(false)
 
 	const closeComp = () => {
 		dispatch(setComponents({component: 'gRoot', parent: 'gInfos'}))
+	}
+	function loaded(msg) {
+		setLoader(false)
+		dispatch(handleAlert({open: true, msg, severity: 'success'}))
+		closeComp()
 	}
 	const setSelected = (user) => {
 		let find = selectedUsers.findIndex(i => i.username === user.username)
@@ -175,6 +182,7 @@ const AddGroupMembers = ({activeUsers, participants, _id}) => {
 			closeComp()
 			return 
 		}
+		setLoader(true)
 
 		const _date = new Date()
 		const dateNow = () => _date.getTime()
@@ -190,8 +198,7 @@ const AddGroupMembers = ({activeUsers, participants, _id}) => {
 				timestamp: retrieveDate() ,
 			},
 		}
-		emit('addGroupMembers', groupInfo)
-		closeComp()
+		emit('addGroupMembers', groupInfo, () => loaded('Action successful'))
 	
 	}
 	return (
@@ -202,6 +209,9 @@ const AddGroupMembers = ({activeUsers, participants, _id}) => {
 					<KeyboardBackspaceIcon />
 				</IconButton>
 				<Typography component='h6'> Add group members </Typography>
+				{ loading &&
+					<NetworkProgress />
+				}
 			</Header>
 			<InputBase
 					className={classes.searchbar}
