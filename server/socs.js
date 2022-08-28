@@ -117,7 +117,7 @@ user.on('connection', socket => {
 		})
 	})
 
-	socket.on('newGroup', obj => {
+	socket.on('newGroup', (obj, fn) => {
 		// save to DB and get group ID
 		groupsUtil.createGroup(obj, _id => {
 			// append it to group session
@@ -128,7 +128,9 @@ user.on('connection', socket => {
 				_id, 
 				evt: 'fetchGroupInfo', 
 				body: {_id}
-			})
+			}, obj.createdBy.username)
+
+			fn()
 		})
 		
 	})
@@ -183,7 +185,7 @@ user.on('connection', socket => {
 		})
 	})
 
-	socket.on('addGroupMembers', async ({_id, members, message}) => {
+	socket.on('addGroupMembers', async ({_id, members, message}, fn) => {
 
 		await groupsUtil.addGroupMembers({_id, members, message}, participants => {
 			groupSession.appendGroup({_id, participants})
@@ -195,12 +197,13 @@ user.on('connection', socket => {
 					_id
 				}
 			})
+			fn()
 			emitToGroup({_id, evt: 'chatFromGroup', body: {_id, chat: message}})
 
 		})
 	})
 
-	socket.on('editGroupDescription', async ({_id, description, message}) => {
+	socket.on('editGroupDescription', async ({_id, description, message}, fn) => {
 		const newDesc = await groupsUtil.saveDescription({desc: description, _id, message})
 		emitToGroup({
 			_id,
@@ -211,9 +214,10 @@ user.on('connection', socket => {
 			}
 		})
 		emitToGroup({_id, evt: 'chatFromGroup', body: {_id, chat: message}})
+		fn()
 	})
 
-	socket.on('handleGroupSettings', async ({_id, settings}) => {
+	socket.on('handleGroupSettings', async ({_id, settings}, fn) => {
 		const updatedSettings = await groupsUtil.saveSettings(_id, settings)
 		emitToGroup({
 			_id,
@@ -223,9 +227,10 @@ user.on('connection', socket => {
 				settings: updatedSettings,
 			}
 		})
+		fn()
 	})
 
-	socket.on('editGroupName', async ({_id, groupName, message}) => {
+	socket.on('editGroupName', async ({_id, groupName, message}, fn) => {
 		await groupsUtil.saveName({_id, groupName, message}, newName => {
 			emitToGroup({
 				_id,
@@ -235,13 +240,13 @@ user.on('connection', socket => {
 					_id
 				}
 			})
-
+			fn()
 			emitToGroup({_id, evt: 'chatFromGroup', body: {_id, chat: message}})
 		})
 
 	})
 
-	socket.on('addAdmin', ({_id, username}) => {
+	socket.on('addAdmin', ({_id, username}, fn) => {
 		groupsUtil.addAdmin({_id, username}, admins => {
 			emitToGroup({
 				_id,
@@ -251,6 +256,8 @@ user.on('connection', socket => {
 					_id
 				}
 			})
+
+			fn()
 		})
 	})
 
