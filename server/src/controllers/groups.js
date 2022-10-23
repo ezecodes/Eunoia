@@ -6,7 +6,7 @@ async function fetchGroupChats(request, response) {
 	const groupChats = await PrivateGroup.findOne({_id: groupId}, {
 		_id: 1,
 		name: 1,
-		messages: {$slice: -10}, 
+		messages: {$slice: -30}, 
 		createdBy: 1,
 		participants: 1,
 		admins: 1,
@@ -15,7 +15,7 @@ async function fetchGroupChats(request, response) {
 	})
 
 	if (groupChats) {
-		response.json(groupChats)
+		response.send(groupChats)
 	}
 }
 

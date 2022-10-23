@@ -13,31 +13,62 @@ import Settings from './settings/Settings'
 import ResetPassword from './settings/ResetPassword'
 import ContactInfo from './settings/ContactInfo'
 
+import DragIndicatorIcon from '@material-ui/icons/DragIndicator';
+import IconButton from '@material-ui/core/IconButton'
+
 import styles from '../../../stylesheet/transition.css'
 
 import { useSelector } from 'react-redux'
 
-const useStyles = makeStyles(() => ({
-	leftpane: {
-		background: common.white,
-		// background: 'linear-gradient(39deg, #ffffff, #e5af1800)',
-		zIndex: 25,
-		minWidth: 250,
-		maxWidth: 400,
-		width: 330,
-		overflowY: 'scroll',
-		'& > section': {
-			width: '100%',
-		},
-		['@media (max-width: 660px)']: {
-			width: '100%',
-			maxWidth: '100%'
-		},
+import styled from 'styled-components'
+
+const classNames = [styles.animate__fadeInRight, styles.animate__animated].join(' ')
+
+const Root = styled.section.attrs(props => ({
+
+}))`
+	z-index: 25;
+	display: flex;
+	width: ${props => props.width + 'px'};
+	min-width: ${props => props.minWidth + 'px'};
+	max-width: 400px;
+
+	.wrap {
+		background: ${common.white};
+		width: 100%;
+		overflow-y: scroll;
+
+		& > section {
+			width: 100%
+		}
+
 	}
-}))
+
+
+	@media (max-width: 660px) {
+		width: 100%;
+		max-width: 100%;
+		min-width: 100%;
+	}
+
+	.resize {
+		cursor: col-resize;
+		display: flex;
+		align-items: center;
+		width: 1px;
+
+		.MuiSvgIcon-root {
+			fill: #a5a5a5;
+		}
+
+		@media (max-width: 660px) {
+			display: none;
+		}
+
+	}
+`
 
 const LeftPane = () => {
-	const classes = useStyles()
 	const {
 		activeUsers,
 		recentChats,
@@ -47,34 +78,44 @@ const LeftPane = () => {
 		newGroup
 	} = useSelector(state => state.components.stack)
 
-	const networkError = useSelector(state => state.chat.networkError)
+	const DEFAULT_WIDTH = 330
+	const [width, setWidth] = React.useState(DEFAULT_WIDTH)
+	
+	// const ele = React.createRef(null)
 
-	const trasitionProps = {
-		timeout: 500,
-		unmountOnExit: true,
-		className: 'animate__animated',
-		classNames: {
-			enter: 'animate__fadeInRight',
-		}
+	// const beginDrag = e => {
+	// 	console.log('start')
+	// 	e.target.addEventListener('mousemove', startResize)
+	// 	e.target.addEventListener('mouseup', stopResize)
+	// 	e.target.addEventListener('mouseout', stopResize)
+	// }
+	// const stopResize = () => {
+	// 	console.log('stop')
+	// 	window.removeEventListener('mousemove', startResize)
+	// 	window.removeEventListener('mousedown', beginDrag)
+	// }
+
+	// React.useEffect(() => {
+	// 	// console.log(width)
+	// }, [width])
+
+	const startResize = evt => {
+		setWidth( width + evt.movementX )
 	}
 	return (
-		<section className={classes.leftpane} >
-			<Snackbar open={networkError}
-      	className={[classes.bottomSnackbar, classes.snackbar].join(' ')}
-				autoHideDuration={6000} 
-			>
-			  <MuiAlert variant='filled' elevation={6} severity="error">
-			    Network error. Check your connection.
-			  </MuiAlert>
-			</Snackbar>
-
-			{activeUsers && <ActiveUsers className={[styles.animate__fadeInRight, styles.animate__animated].join(' ')}/>}
-			{recentChats && <RecentChats className={[styles.animate__fadeInRight, styles.animate__animated].join(' ')} />}
-			{newGroup && <NewGroup className={[styles.animate__fadeInRight, styles.animate__animated].join(' ')} />}
-			{settings && <Settings className={[styles.animate__fadeInRight, styles.animate__animated].join(' ')} />}
-			{contactInfo && <ContactInfo className={[styles.animate__fadeInRight, styles.animate__animated].join(' ')}/>}
-			{resetPassword && <ResetPassword className={[styles.animate__fadeInRight, styles.animate__animated].join(' ')}/>}
-		</section>
+		<Root width={width} minWidth={DEFAULT_WIDTH} >
+			<div className='wrap'>
+				{activeUsers && <ActiveUsers className={classNames}/>}
+				{recentChats && <RecentChats className={classNames} />}
+				{newGroup && <NewGroup className={classNames} />}
+				{settings && <Settings className={classNames} />}
+				{contactInfo && <ContactInfo className={classNames}/>}
+				{resetPassword && <ResetPassword className={classNames}/>}
+			</div>
+			{/*<div className='resize' onMouseDown={beginDrag} >
+				<DragIndicatorIcon />
+			</div>*/}
+		</Root>
 			
 	)
 }

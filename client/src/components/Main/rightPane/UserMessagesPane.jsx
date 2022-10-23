@@ -52,16 +52,15 @@ import {
 	fetchUserProfile,
 	handleReply,
 	setSelectedChat,
+	setUserInput,
 	setUserProfile
 } from '../../../Redux/features/chatSlice'
 
 import { setTypingStatus, handleAlert } from '../../../Redux/features/otherSlice'
 import {updateRecentChats, syncRecentsWithDeleted} from '../../../Redux/features/recentChatsSlice'
 
-import { getWindowHeight, assert, getLastSeen, retrieveDate } from '../../../lib/script'
-
+import { assert, getLastSeen, retrieveDate } from '../../../lib/script'
 import emit from '../../../sockets/outgoing'
-
 import HelperAlert from '../../HelperAlert'
 import UserChatMessages from './UserChatMessages'
 import UserAvatar from '../UserAvatar'
@@ -136,15 +135,11 @@ function ActionNotifier(props) {
   )
 }
 
-const LS = (str) => {
-	return JSON.parse(localStorage.getItem(str))
-}
-
 const UserMessagesPane = ({friend, typingStatus, onlineStatus, lastSeen}) => {
 	const classes = useStyles()
 
 	const dispatch = useDispatch()
-	const {username, id} = LS('details')
+	const {username, id} = useSelector(state => state.account.account)
 
 	const profile = useSelector(state => state.components.profile)
 
@@ -154,10 +149,9 @@ const UserMessagesPane = ({friend, typingStatus, onlineStatus, lastSeen}) => {
 
 	const selectedChat = useSelector(state => state.chat.selectedChat)
 
-	const inputRef = React.createRef(null)
 	const [timerToDelete, setDeleteTimer] = React.useState(null)
 
-	const {pendingDelete, starredChat, reply, showProfile} = friend.actionValues
+	const {pendingDelete, starredChat, reply, showProfile, inputValue, scrollPos} = friend.actionValues
 	const [showHelper, setHelperAlert] = React.useState(false)
 	const [anchorEl, setAnchorEl] = React.useState(null)
 
@@ -171,7 +165,6 @@ const UserMessagesPane = ({friend, typingStatus, onlineStatus, lastSeen}) => {
 
 	const [typing, setTyping] = React.useState(false)
 	const [pos, setPos] = React.useState({})
-	const [inputValue, setInput] = React.useState('')
 
 	const [secondaryText, setText] = React.useState('')
 
@@ -242,8 +235,8 @@ const UserMessagesPane = ({friend, typingStatus, onlineStatus, lastSeen}) => {
 	}
 
 	const handleTextInput = (value) => {
-		setInput(value)
 		clearTimeout(timer)
+		dispatch(setUserInput({username: friend.username, value}))
 
 		const newTimer = setTimeout( async () => {
 			handleTypingStatus(false)
@@ -262,13 +255,13 @@ const UserMessagesPane = ({friend, typingStatus, onlineStatus, lastSeen}) => {
 	const handleError = (info) => dispatch(handleAlert(info))
 
 	const sendMessage = () => {
+		const finalValue = inputValue.trim()
+		if (finalValue.replaceAll(' ', '') === '') return false
+
 		typing && handleTypingStatus(false)
-		if (inputValue.replaceAll(' ', '') === '' ) {
-			return 
-		}
 		if (!accountIsOnline) {
 			handleError({open: true})
-			return
+			return false
 		}
 		const _date = new Date()
 		const dateNow = () => _date.getTime()
@@ -279,7 +272,7 @@ const UserMessagesPane = ({friend, typingStatus, onlineStatus, lastSeen}) => {
 			sender: username,
 			lastSent: thisDate,
 			message: {
-				message: inputValue,
+				message: finalValue,
 				chatId: thisDate,
 				sender: username,
 				read: false,
@@ -292,8 +285,7 @@ const UserMessagesPane = ({friend, typingStatus, onlineStatus, lastSeen}) => {
 		emit('sentChat', chatObj)
 		dispatch(storeSentChat(chatObj))
 		reply.open && closeReplyHandle()
-		setInput('')
-
+		dispatch(setUserInput({username: friend.username, value: ''}))
 	}
 
 	const handleChatHighlight = () => {
@@ -457,8 +449,8 @@ const UserMessagesPane = ({friend, typingStatus, onlineStatus, lastSeen}) => {
       		handleChatHighlight={handleChatHighlight}
       	/>
       	<MessageInput 
+      		inputValue={inputValue}
     			handleTextInput={handleTextInput}
-    			value={inputValue}
     			sendMessage={sendMessage}
     		/>
 	      	

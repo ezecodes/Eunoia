@@ -1,15 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 
-export const fetchMessages = createAsyncThunk('fetchMessages', 
-	async ({id, username}) => {
-		const response = await fetch(`/chat/fetchMessages/${id}/${username}`)
-		if (response.ok) {
-			const messages = await response.json()
-			return messages
-		}
-	}
-)
-
 export const fetchUserProfile = createAsyncThunk('fetchUserProfile', 
 	async ({id, pid}) => {
 		const response = await fetch(`/account/profile/${id}/${pid}`)
@@ -24,7 +14,9 @@ const actionValues = {
 	pendingDelete: {},
 	reply: {open: false},
 	selectedChat: {},
-	starredChat: {}
+	starredChat: {},
+	inputValue: '',
+	scrollPos: ''
 }
 
 const initialState = {
@@ -109,6 +101,14 @@ const chatSlice = createSlice({
 
 		setSelectedChat: (state, action) => {
 			state.selectedChat = action.payload
+		},
+
+		setUserInput: (state, action) => {
+			const {username, value} = action.payload
+			const find = state.privateChats.findIndex(i => i.username === username)
+			if (find !== -1) {
+				state.privateChats[find].actionValues.inputValue = value
+			}
 		},
 
 		setHighlighted: (state, action) => {
@@ -201,16 +201,8 @@ const chatSlice = createSlice({
 		},
 		setUserProfile: (state, action) => {
 			state.showUserProfile = action.payload
-		}
-	},
-	extraReducers: builder => {
-		builder.addCase(fetchMessages.pending, (state, action) => {
-			state.networkError = false
-		})
-		.addCase(fetchMessages.rejected, (state, action) => {
-			state.networkError = true
-		})
-		.addCase(fetchMessages.fulfilled, (state, action) => {
+		},
+		storeMessages: (state, action) => {
 			state.networkError= false
 			const { username, messages, starredChat } = action.payload
 
@@ -226,15 +218,16 @@ const chatSlice = createSlice({
 			} else {
 				state.privateChats[idx] = {messages, actionValues, username, starredChat, profile: {}}
 			}
-		})
-		.addCase(fetchUserProfile.pending, (state, action) => {
-			// state.showLoaderProfile = true
-		})
-		.addCase(fetchUserProfile.fulfilled, (state, action) => {
+		},
+
+		storeUserProfile: (state, action) => {
 			const { profile } = action.payload
 			const idx = state.privateChats.findIndex( chat => chat.username === profile.username)
 			state.privateChats[idx].profile = profile
-		})
+		}
+	},
+	extraReducers: builder => {
+		
 	}
 })
 
@@ -243,8 +236,10 @@ export const {
 	setHighlighted,
 	storeReceivedChat,
 	setChatRead,
+	setUserInput,
 	setReaction,
 	clearChats,
+	storeMessages,
 	handleStarredChat,
 	performChatDelete,
 	setPendingDelete,

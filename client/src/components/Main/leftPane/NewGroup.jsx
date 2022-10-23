@@ -33,7 +33,7 @@ import { makeStyles } from '@material-ui/core/styles';
 
 import { setComponents} from '../../../Redux/features/componentSlice'
 import { addGroupUser, unselectUser} from '../../../Redux/features/groupSlice'
-import { addGroup, fetchRecentChats } from '../../../Redux/features/recentChatsSlice'
+import { addGroup, storeRecentChats } from '../../../Redux/features/recentChatsSlice'
 
 import { handleAlert } from '../../../Redux/features/otherSlice'
 
@@ -44,6 +44,7 @@ import SearchBar from '../SearchBar'
 
 import { assertChar, retrieveDate } from '../../../lib/script'
 import emit from '../../../sockets/outgoing'
+import { getRecentChats } from '../../../api/recent-chat'
 
 const useStyles = makeStyles({
 	groupUsers: {
@@ -231,8 +232,8 @@ const NewGroup = ({className}) => {
 				],
 				
 			}
-			emit('newGroup', groupInfo, (v) => {
-				dispatch(fetchRecentChats(id))
+			emit('newGroup', groupInfo, () => {
+				getRecentChats(res => dispatch(storeRecentChats(res)))
 				setComponent()
 			})
 		} else {

@@ -30,11 +30,13 @@ import {
 
 import {setComponents} from '../../../Redux/features/componentSlice'
 import { setSelectedUser, assertFetch } from '../../../Redux/features/otherSlice'
-import { fetchMessages } from '../../../Redux/features/chatSlice'
+import { storeMessages } from '../../../Redux/features/chatSlice'
 import { setSelectedGroup } from '../../../Redux/features/groupSlice'
 
 import { assert, getDateValue, handleFetch } from '../../../lib/script'
 import emit from '../../../sockets/outgoing'
+import { fetchMessages } from '../../../api/chat'
+import { starChat } from '../../../api/recent-chat'
 
 const useStyles = makeStyles({
 	listItem: {
@@ -135,8 +137,7 @@ function UserList({
 	isFetched,
 	isCurrentSelectedUser
 }) {
-	const accountName = useSelector(state => state.account.account.username)
-	const id = useSelector(state => state.account.account.id)
+	const {username: accountName, id} = useSelector(state => state.account.account)
 	const classes = useStyles()
 	const dispatch = useDispatch()
 	const [showMenu, setMenu] = React.useState(false)
@@ -156,8 +157,7 @@ function UserList({
 	}
 
 	const handleDispatch = () => {
-		groupIsSelected && 
-			dispatch(setSelectedGroup({}))
+		groupIsSelected && dispatch(setSelectedGroup({}))
 		dispatch(setSelectedUser({username}))
 		setPane()
 	}
@@ -178,9 +178,8 @@ function UserList({
 		if (isFetched) {
 			handleDispatch()
 		} else {
-			dispatch(
-				fetchMessages({username, id})
-			).then(() => {
+			fetchMessages({username}, res => {
+				dispatch(storeMessages(res))
 				dispatch(assertFetch(username))
 				handleDispatch()
 			})
@@ -203,11 +202,7 @@ function UserList({
 	const starConversation = () => {
 		const starred = {value: !isStarred.value, date: Date.now()}
 
-		handleFetch(
-			`chat/starConversation/${id}/${username}`,
-			'put',
-			{starred},
-		)
+		starChat({username, starred})
 		// emit('starConversation', id, username, starred, () => {})
 		dispatch(handleStarred({friendsName: username, isStarred: starred }))
 	}

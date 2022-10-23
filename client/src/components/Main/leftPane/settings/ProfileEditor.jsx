@@ -21,7 +21,7 @@ import { Preloader, Oval } from 'react-preloader-icon'
 import { profileUpdate} from '../../../../Redux/features/accountSlice'
 import { handleAlert} from '../../../../Redux/features/otherSlice'
 
-import { handleFetch } from '../../../../lib/script'
+import { saveProfileInfo } from '../../../../api/account'
 
 const useStyles = makeStyles((theme) => ({
 	dialog: {
@@ -98,10 +98,9 @@ const validate = (input) => {
 }
 
 const ProfileEditor = ({open}) => {
-	const {id} = JSON.parse(localStorage.getItem('details'))
 	const {useState, useEffect} = React
 	const dispatch = useDispatch()
-	const { displayName, bio} = useSelector(state => state.account.account)
+	const { displayName, bio, id} = useSelector(state => state.account.account)
 	const classes = useStyles()
 	const [dialog, setDialog] = useState(false)
 	const [noSave, setDisabled] = useState(false)
@@ -122,26 +121,9 @@ const ProfileEditor = ({open}) => {
 
 	useEffect(() => {
 		setValue({displayName, bio})
-		// if (!dialog) {
-		// 	setDisabled(false)
-		// 	setPreloader(false)
-		// 	disableInput(false)
-		// 	setValue({displayName: '', bio: ''})
-		// 	setHelperText({displayName: '', bio: ''})
-		// }
 	}, [dialog])
 	
 	const changeDisplayName = (value) => {
-		// if (value.length < 3) {
-		// 	setError({...error, displayName: true})
-		// 	setHelperText({...helperText, displayName: 'Name is too short'})
-		// 	value !== '' && setDisabled(true)
-		// } else {
-		// 	setError({...error, displayName: false})
-		// 	setHelperText({...helperText, displayName: ''})
-		// 	setDisabled(false)
-		// }
-		
 		setValue({...values, displayName: value})
 	}
 
@@ -159,26 +141,18 @@ const ProfileEditor = ({open}) => {
 	const openProfileEditor = () => {
 		setDialog(true)
 	}
-	const saveProfileInfo = () => {
+	const _saveProfileInfo = () => {
 		setPreloader(true)
 		setDisabled(true)
 		disableInput(true)
-		handleFetch(
-			`/account/saveProfileInfo/${id}`, 
-			'put', 
-			{
-				newDisplayName: values.displayName,
-				newBio: values.bio
-			}, 
-			(res) => {
-				dispatch(profileUpdate(res))
-				dispatch(handleAlert({open: true, severity: 'success', msg: 'Profile updated successfully'}))
-				setPreloader(false)
-				setDisabled(false)
-				disableInput(false)
-				handleClose()
-			}
-		)
+		saveProfileInfo(values, res => {
+			dispatch(profileUpdate(res))
+			dispatch(handleAlert({open: true, severity: 'success', msg: 'Profile updated successfully'}))
+			setPreloader(false)
+			setDisabled(false)
+			disableInput(false)
+			handleClose()
+		})
 	}
 
 
@@ -193,7 +167,7 @@ const ProfileEditor = ({open}) => {
        	 <EditIcon className={classes.editIcon} style={{fontSize: '1rem', marginLeft: '.5rem'}} />
         </DialogTitle>
         <DialogContent>
-        	<form>
+        	<form onSubmit={e => e.preventDefault()}>
         		<fieldset>
 							{/*<div className={classes.formField}>
 								<label htmlFor='username' className={classes.disabled} > 
@@ -260,7 +234,7 @@ const ProfileEditor = ({open}) => {
             Cancel
           </Button>
           <Button disabled={noSave} onClick={() => {
-          	saveProfileInfo()
+          	_saveProfileInfo()
           }} color="primary">
           	{
 							preloader ? 

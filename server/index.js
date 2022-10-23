@@ -12,9 +12,9 @@ mongoose.connect(DB_URI , {
 	useUnifiedTopology: true
 })
 
-db.once('open', () => {
-	console.log(`Database running. URI ${DB_URI}`)
-})
+db.once('open', async () => {
+	console.log(`Database running.`)
+});
 
 io.attach(server)
 

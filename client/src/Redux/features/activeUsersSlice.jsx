@@ -1,16 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 
-export const fetchActiveUsers = createAsyncThunk(
-	'fetchActiveUsers', 
-	async (id) => {
-		const response = await fetch(`/account/users/${id}`)
-		if (response.ok) {
-			const users = await response.json()
-			return users
-		}
-	}
-)
-
 const initialState = {
 	activeUsers: [],
 	showActiveUsersLoader: false,
@@ -66,13 +55,8 @@ const activeUsersSlice = createSlice({
 			if (find !== -1) {
 				state.activeUsers[find].typing = typing
 			}
-		}
-	},
-	extraReducers: builder => {
-		builder.addCase(fetchActiveUsers.pending, (state, action) => {
-			state.showActiveUsersLoader = true
-		})
-		.addCase(fetchActiveUsers.fulfilled, (state, action) => {
+		},
+		storeActiveUsers: (state, action) => {
 			action.payload.users.forEach(i => {
 				i.online = false
 				i.visible = true
@@ -83,13 +67,17 @@ const activeUsersSlice = createSlice({
 				if (a.username.toUpperCase() > b.username.toUpperCase()) return 1
 			})
 			state.showActiveUsersLoader = false
-		})
+		}
+	},
+	extraReducers: builder => {
+		
 	}
 })
 
 export const {
 	setActiveOnline,
 	setActiveDisconnect,
+	storeActiveUsers,
 	handleChips,
 	setTypingStatus,
 	searchActiveUsers

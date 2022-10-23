@@ -46,8 +46,9 @@ import {
 	deleteGroup
 } from '../../../Redux/features/groupSlice'
 
-import { assert, handleFetch, retrieveDate } from '../../../lib/script'
-
+import { assert, retrieveDate } from '../../../lib/script'
+import { clearRecentChat } from '../../../api/recent-chat'
+import { leaveGroup } from '../../../api/group-chat'
 import emit from '../../../sockets/outgoing'
 
 const useStyles = makeStyles({
@@ -104,7 +105,7 @@ const RecentChats = ({className}) => {
 	const chatToBeCleared = useSelector(state => state.recentChats.chatToBeCleared)
 	const groupToBeDeleted = useSelector(state => state.recentChats.groupToBeDeleted)
 	const input = useSelector(state => state.recentChats.input)
-	const {id} = useSelector(state => state.account.account)
+	const {id, username} = useSelector(state => state.account.account)
 
 	const { useEffect, useState } = React
 	const classes = useStyles()
@@ -127,7 +128,6 @@ const RecentChats = ({className}) => {
 	const onlineUsers = useSelector(state => state.socketActivity.onlineUsers)
 	const fetchedGroups = useSelector(state => state.groups.fetchedGroups)
 
-	const { username} = JSON.parse(localStorage.getItem('details'))
 	const [showDial, setDial] = useState(false)
 	const [visible, setDialVisibility] = useState(false)
 
@@ -147,10 +147,7 @@ const RecentChats = ({className}) => {
 		if (selectedUser.username === chatToBeCleared.username) {
 			dispatch(setSelectedUser({}))
 		}
-		handleFetch(
-			`chat/clearConversation/${id}/${chatToBeCleared.username}`,
-			'delete'
-		)
+		clearRecentChat({username: chatToBeCleared.username})
 		dispatch(clearConversation(chatToBeCleared.username))
 		dispatch(clearChats(chatToBeCleared.username))
 	}
@@ -181,10 +178,7 @@ const RecentChats = ({className}) => {
 				}
 			}
 		)
-		handleFetch(
-			`chat/deleteGroup/${id}/${groupToBeDeleted}`,
-			'delete'
-		)
+		leaveGroup({groupId: groupToBeDeleted})
 		dispatch(exitGroup(groupToBeDeleted))
 		dispatch(deleteGroup(groupToBeDeleted))
 	}
@@ -341,10 +335,10 @@ const RecentChats = ({className}) => {
 		        aria-labelledby="alert-dialog-title"
 		        aria-describedby="alert-dialog-description"
 		      >
-		        <DialogTitle id="alert-dialog-title">{"Clear group conversation"}</DialogTitle>
+		        <DialogTitle id="alert-dialog-title">{"Exit group"}</DialogTitle>
 		        <DialogContent>
 		          <DialogContentText id="alert-dialog-description">
-		            {`This action will permanently clear your entire chat history with the seleceted group. Continue?`}
+		            {`This action will permanently clear your entire chat history with the \n seleceted group and you\'ll no longer be a member of the group. Continue?`}
 		          </DialogContentText>
 		        </DialogContent>
 		        <DialogActions>

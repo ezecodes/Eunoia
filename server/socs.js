@@ -1,4 +1,6 @@
 const io = require('socket.io')()
+module.exports = io
+
 const groupSession = require('./src/sockets/sessions/groupSession.js')
 
 const user = io.of('/user')
@@ -142,7 +144,7 @@ user.on('connection', socket => {
 			_id, 
 			evt: 'chatFromGroup', 
 			body: {_id, chat}
-		})
+		}, chat.sender)
 	})
 
 	socket.on('deleteGroupChat', ({_id, chatId}) => {
@@ -262,6 +264,3 @@ user.on('connection', socket => {
 	})
 
 })
-
-module.exports = io
-

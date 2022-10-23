@@ -36,7 +36,7 @@ import { setUserProfile } from '../../../Redux/features/chatSlice'
 import { setComponents} from '../../../Redux/features/componentSlice'
 
 import Header from '../Header'
-import { getWindowHeight } from '../../../lib/script'
+import { useWinHeight } from '../../../hooks/hooks'
 
 const useStyles = makeStyles({
 	
@@ -155,8 +155,9 @@ const actions = [
 const UserProfile = ({username, displayName, joined, bio, socials}) => {
 	const dispatch = useDispatch()
 	const classes = useStyles()
-	const {id} = JSON.parse(localStorage.getItem('details'))
+	const {id} = useSelector(state => state.account.account)
 	const [cur, setCur] = React.useState('')
+	const height = useWinHeight()
 
 	const setComp = (obj) => {
 		dispatch(setUserProfile(false))
@@ -170,7 +171,7 @@ const UserProfile = ({username, displayName, joined, bio, socials}) => {
   }
 	return (
 		<Slide in={true} direction='left'>
-		<div style={{height: `${getWindowHeight()}px`}}>
+		<div style={{height: `${height}px`}}>
 			<Header>
 				<IconButton onClick={() => setComp({component: 'profile', value: false})} >
 					<KeyboardArrowLeftIcon />

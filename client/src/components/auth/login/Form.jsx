@@ -8,50 +8,17 @@ import { Visibility, VisibilityOff, LockSharp, AccountCircle } from '@material-u
 import { Preloader, ThreeDots, Oval } from 'react-preloader-icon'
 import { useDispatch, useSelector } from 'react-redux'
 import { makeStyles } from '@material-ui/core/styles';
+import Input, { Check } from '../Input'
 
-import { handleAlert } from '../../Redux/features/otherSlice'
-
-import { handleFetch } from '../../lib/script'
-import HelperAlert from '../HelperAlert'
-
-const useStyles = makeStyles({
-	formField: {
-		// display: 'flex',
-		// flexDirection: 'column',
-		marginBottom: '1rem',
-
-		'& > label': {
-			display: 'block',
-			marginBottom: '.4rem'
-		},
-		'& > button': {
-			color: '#fff',
-			margin: '1rem 0 1.5rem 0'
-		},
-
-		'& .MuiFormControl-root': {
-
-			width: '100%',
-
-			'& .MuiOutlinedInput-input': {
-				padding: '13px 10px'
-			},
-
-		},
-		'& .MuiButton-contained.Mui-disabled': {
-			color: '#fff',
-			backgroundColor: '#9eb9e9'
-		}
-			
-	}
-
-})
-
+import { handleAlert } from '../../../Redux/features/otherSlice'
+import { handleFetch } from '../../../lib/script'
+import {signIn} from '../auth-api'
+import { storeCredentials } from '../../../helpers/auth-helper'
 
 const Form = ({login}) => {
-	const classes = useStyles()
 	// sessionStorage.setItem('refresh', 'false')
 	const dispatch = useDispatch()
+	const [int, setInt] = React.useState(false)
 	const [showPassword, changePasswordVisibility] = React.useState(false)
   const [disabled, setButtonState] = React.useState(false)
   const [input, setInputValues] = React.useState({
@@ -63,6 +30,7 @@ const Form = ({login}) => {
   const [error, setErrorState] = React.useState({
   	username: false, password: false
   })
+  const [checked, setCheckbox] = React.useState(false)
   const [showLoginAlert, setLoginAlert] = React.useState(false)
 	const handlePasswordValue = e => {
 		setInputValues({...input, password: e.target.value})
@@ -84,62 +52,62 @@ const Form = ({login}) => {
 		}
 
 	}
+	const handleCheckbox = () => setCheckbox(!checked)
 	const handleClose = () => {
 		setLoginAlert(false)
 	}
 	const handleButtonState = (bool) => {
 		setButtonState(bool)
 	}
+	const errMsg = (msg) => {
+		dispatch(handleAlert({
+			open: true, msg, severity: 'error'
+		}))
+	}
+	const successMsg = (msg) => {
+		dispatch(handleAlert({
+			open: true, msg, severity: 'success'
+		}))
+	}
 	const submitForm = (e) => {
 		e.preventDefault()
 		handleButtonState(true)
-		handleFetch(
-			'/user/login', 
-			'post', 
-			{username: input.username, password: input.password},
-			(res) => {
-				dispatch(handleAlert({
-					open: true,
-					msg: 'Log in successful',
-					severity: 'success'
-				}))
-				handleButtonState(false)
-				localStorage.setItem('details', JSON.stringify(res))
-				document.location.pathname = '/'
-			},
-			(err) => {
-				dispatch(handleAlert({
-					open: true,
-					msg: 'Something went wrong. \n Try again.',
-					severity: 'error'
-				}))
-				handleButtonState(false)
+		const req_obj = {
+			username: input.username,
+			password: input.password,
+			persisLogin: checked
+		}
+
+		signIn(req_obj).then(res => {
+			handleButtonState(false)
+			if (res.error) {
+				errMsg(res.error)
+			} else {
+				storeCredentials(res, () => {
+					successMsg('Log in successful ✌')
+					handleButtonState(false)
+					document.location = '/'
+				})
 			}
-		)
+		})
 	}
+		
 	return (
-		<form className={classes.form} onSubmit={submitForm} >
+		<form onSubmit={submitForm}>
 			<fieldset>
-				<div className={classes.formField}>
+				<div className={'formField'}>
 					<label htmlFor='username' > Username </label>
-					<TextField
-						required
+					<Input 
 						type='text' 
 						autoComplete='username'
-						id='username' 
-						variant='outlined' 
-						color='primary' 
+						id='username'
 						error={error.username} 
 						helperText={helperText.username}
 						value={input.username}
 						onChange={handleUsernameValue} 
-						InputProps={{
-							startAdornment: <InputAdornment position='start'>
-								<AccountCircle fontSize='small' color='secondary' />
-							</InputAdornment>
-					}} />
+					/>
 				</div>
-				<div className={classes.formField}>
+				<div className={'formField'}>
 					<label htmlFor='current-password' > Password </label>
 					  <TextField
 							required
@@ -153,9 +121,6 @@ const Form = ({login}) => {
 					    helperText={helperText.password}
 					    value={input.password}
 					    InputProps={{
-					    	startAdornment: <InputAdornment position='start'>
-					    		<LockSharp fontSize='small' color='secondary' />
-					    	</InputAdornment>,
 					    	endAdornment: <InputAdornment position='end' >
 					    		<IconButton color='secondary' aria-label='Toggle password visibility' onClick={() => handlePV()}>
 					    			{showPassword ? <Visibility /> : <VisibilityOff />}
@@ -165,13 +130,19 @@ const Form = ({login}) => {
 					  />
 				</div>
 			</fieldset>
+			<fieldset>
+				<Check 
+					checked={checked}
+					onChange={handleCheckbox}
+				/>
+			</fieldset>
 			{/*<fieldset>
 				<div className={[classes.formField, classes.forgotPassword].join(' ')}>
 					<button type='button'> Forgot Password? </button>
 				</div>
 			</fieldset>*/}
 			<fieldset>
-				<div className={classes.formField}>
+				<div className={'formField'}>
 					<Button 
 					variant='contained' 
 					color='primary'

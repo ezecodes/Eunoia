@@ -10,7 +10,7 @@ import { setComponents} from '../../../Redux/features/componentSlice'
 import Preloader from '../../Preloader'
 
 import { setSelectedUser, assertFetch } from '../../../Redux/features/otherSlice'
-import { fetchMessages } from '../../../Redux/features/chatSlice'
+import { storeMessages } from '../../../Redux/features/chatSlice'
 import { resetUnread } from '../../../Redux/features/recentChatsSlice'
 import { searchActiveUsers } from '../../../Redux/features/activeUsersSlice'
 import { setSelectedGroup } from '../../../Redux/features/groupSlice'
@@ -29,7 +29,7 @@ import SearchBar from '../SearchBar'
 
 import { getLastSeen, assert } from '../../../lib/script'
 import emit from '../../../sockets/outgoing'
-
+import { fetchMessages } from '../../../api/chat'
 
 const useStyles = makeStyles({
 	backBtn: {
@@ -62,11 +62,11 @@ const useStyles = makeStyles({
 })
 
 const UserList = ({user, style, secondaryItems, groupSelected}) => {
-	const {id, username} = JSON.parse(localStorage.getItem('details'))
+	const {id, username} = useSelector(state => state.account.account)
 	const classses = useStyles()
 	const dispatch = useDispatch()
 	const selectedUser = useSelector(state => state.other.currentSelectedUser)
-	const selectedUsersArr = useSelector(state => state.other.fetched)
+	const allFetchedUsers = useSelector(state => state.other.fetched)
 	const find = useSelector(state => state.recentChats.recentChats).find(i => i.username === user.username)
 	const [timer, setTimer] = React.useState(null)
 	const [secondaryText, setText] = React.useState('')
@@ -83,36 +83,34 @@ const UserList = ({user, style, secondaryItems, groupSelected}) => {
 			dispatch(setComponents({parent: 'leftPane', component: false}))
 		}
 	}
-	const handleClick = () => {
 
-		if (selectedUser.username !== user.username) {
+	const handleClick = () => {
+		if (selectedUser.username === user.username) return
 			
-			if (find !== undefined) {
-				if (find.unread > 0) {
-					dispatch(resetUnread(user.username))
-					emit('chatIsRead', {
-						sender: user.username,
-						receiver: username,
-					})
-				}
-			}
-			
-			if (selectedUsersArr.find(i => i === user.username) !== undefined) {
-				dispatch(setSelectedUser(user))
-				setPane()
-				groupSelected && dispatch(setSelectedGroup({}))
-			} else {
-				dispatch(
-					fetchMessages({username: user.username, id})
-				).then(() => {
-					dispatch(assertFetch(user.username))
-					dispatch(setSelectedUser(user))
-					groupSelected && dispatch(setSelectedGroup({}))
-					setPane()
+		if (find !== undefined) {
+			if (find.unread > 0) {
+				dispatch(resetUnread(user.username))
+				emit('chatIsRead', {
+					sender: user.username,
+					receiver: username,
 				})
 			}
-			
 		}
+		
+		if (allFetchedUsers.find(i => i === user.username) !== undefined) {
+			dispatch(setSelectedUser(user))
+			setPane()
+			groupSelected && dispatch(setSelectedGroup({}))
+		} else {
+			fetchMessages({username: user.username}, res => {
+				dispatch(storeMessages(res))
+				dispatch(assertFetch(user.username))
+				dispatch(setSelectedUser(user))
+				groupSelected && dispatch(setSelectedGroup({}))
+				setPane()
+			})
+		}
+			
 	}
 	return (
 		<ListItem	button 

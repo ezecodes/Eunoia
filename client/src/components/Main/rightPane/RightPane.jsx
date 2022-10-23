@@ -12,9 +12,9 @@ import { Link } from 'react-router-dom'
 import ArrowBackIosIcon from '@material-ui/icons/ArrowBackIos';
 import { makeStyles } from '@material-ui/core/styles';
 
-import { assert, getWindowHeight } from '../../../lib/script'
+import { assert } from '../../../lib/script'
+import { useWinHeight } from '../../../hooks/hooks'
 import UserAvatar from '../UserAvatar'
-
 import UserMessagesPane from './UserMessagesPane'
 import UserProfile from './UserProfile'
 import GroupMessagesPane from './GroupMessagesPane'
@@ -79,6 +79,7 @@ const RightPane = ({user}) => {
 	const {gSettings, gRoot, gMembers} = useSelector(state => state.components.gInfos)
 
 	const [anchorEl, setAnchorEl] = React.useState(null)
+	const height = useWinHeight()
 	const open = Boolean(anchorEl)
 	const toggleMenu = (event) => {
 		setAnchorEl(event.target)
@@ -91,7 +92,7 @@ const RightPane = ({user}) => {
 	}
 	
 	return (
-		<section className={classes.rightPane} style={{height: `${getWindowHeight()}px`}} >
+		<section className={classes.rightPane} style={{height: `${height}px`}} >
 			{
 				assert(groupChats) &&
 				groupChats.map((groupChat, i) => {
@@ -103,6 +104,7 @@ const RightPane = ({user}) => {
 					}
 				
 					return (
+						isCurrentSelected() &&
 						<div className={classes.panes} key={groupChat._id} style={{
 							display: isCurrentSelected() ? 'flex' : 'none'
 						}} >
@@ -152,6 +154,7 @@ const RightPane = ({user}) => {
 						}
 						
 						return (
+							isSelectedUser() &&
 							<div className={classes.panes} key={i} 
 								style={{
 									display: isSelectedUser() ? 'flex' : 'none'

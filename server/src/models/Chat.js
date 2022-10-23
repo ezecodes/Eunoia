@@ -3,7 +3,10 @@ const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
 const chatSchema = Schema({
-	_id: Schema.Types.ObjectId,
+	_id: {
+		any: Schema.Types.Mixed,
+		immutable: false
+	},
 	username: String,
 	groups: [
 		{	
@@ -17,7 +20,7 @@ const chatSchema = Schema({
 			},
 			chatType: {type: String, default: 'group'},
 			isNull: {type: Boolean, default: false},
-			lastSent: {type: Number, },
+			lastSent: Number,
 			unread: {type: Array, default: []},
 			lastChat: {type: Object, default: {}}
 		}
@@ -44,6 +47,9 @@ const chatSchema = Schema({
 			}]
 		}
 	]
+}, {
+	strict: true,
+	strictQuery: true
 })
 
 const Chat = mongoose.model('chat', chatSchema)

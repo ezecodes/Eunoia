@@ -48,13 +48,16 @@ const groupsUtil = {
 			createdAt,
 		}, (err, ...args) => {
 			const newGroup = args[0]
+			const lastChat = messages[messages.length -1]
+
 			participants.forEach( async user => {
 				await Chat.findOneAndUpdate({username: user.username}, {
 					$push: {
 						groups: {
 							_id: newGroup.id,
 							name: newGroup.name,
-							lastChat: messages[messages.length -1],
+							lastSent: lastChat.chatId,
+							lastChat,
 							unread: [...messages.map(i => i.chatId)]
 						}
 					}
@@ -62,9 +65,6 @@ const groupsUtil = {
 			})
 			cb(newGroup.id)
 		})
-
-		
-		// console.log(newGroup[0])
 	},
 
 	fetchParticipants: async (groupId) => {
@@ -147,7 +147,8 @@ const groupsUtil = {
 	removeGroupUser: async ({_id, username, message}, cb) => {
 		await Chat.findOneAndUpdate({username: username, 'groups._id': _id}, {
 			'groups.$.isNull': true,
-			'groups.$.lastChat': message
+			'groups.$.lastChat': message,
+			'groups.$.unread': []
 		})
 
 		await PrivateGroup.findById(_id)
@@ -176,7 +177,9 @@ const groupsUtil = {
 					_id,
 					name: findGroup.name,
 					lastChat: message,
+					lastSent: message.chatId,
 					unread: [message.chatId]
+
 				})
 				docs.save()
 			})

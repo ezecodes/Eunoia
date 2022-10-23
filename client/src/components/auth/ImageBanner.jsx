@@ -4,9 +4,9 @@ import { makeStyles } from '@material-ui/core/styles';
 
 import { Button, Typography, Fade , Slide } from '@material-ui/core';
 
-import image1 from '../../public/images/undraw_mobile_encryption_re_yw3o.svg'
-import image2 from '../../public/images/undraw_my_notifications_re_ehmk.svg'
-import image3 from '../../public/images/undraw_chatting_re_j55r.svg'
+import image1 from '../../../public/images/undraw_mobile_encryption_re_yw3o.svg'
+import image2 from '../../../public/images/undraw_my_notifications_re_ehmk.svg'
+import image3 from '../../../public/images/undraw_chatting_re_j55r.svg'
 
 const useStyles = makeStyles({
 	banner: {

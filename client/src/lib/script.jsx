@@ -1,15 +1,3 @@
-import React from 'react'
-
-const baseUrl = ''
-
-export const getWindowHeight = () => {
-	const [height, setHeight] = React.useState(`${window.innerHeight}`)
-	window.addEventListener('resize', () => {
-		setHeight(`${window.innerHeight}`)
-	})
-	return height
-}
-
 export function getTime(date) {
 	let year, day
 
@@ -46,13 +34,6 @@ export function getDateValue(chatId, timestamp) {
 		
 }
 
-export const find = (arr, str, match, cb) => {
-	const obj = arr.find(i => i[`${match}`] === str)
-	const index = arr.findIndex(i => i[`${match}`] === str)
-	if (cb === undefined) return {obj, index}
-	else cb({obj, index})
-}
-
 export async function handleFetch(url = '', method = '', body = {}, callback = () => {}, errorhandler = () => {}) {
 	if (method.toLowerCase() === 'get') {
 
@@ -64,7 +45,8 @@ export async function handleFetch(url = '', method = '', body = {}, callback = (
 		fetch(url, {
 			method: method,
 			headers: {
-				'Content-Type': 'application/json'
+				'Content-Type': 'application/json',
+				accept: 'application/json'
 			},
 			body: JSON.stringify(body)
 		})
@@ -73,6 +55,7 @@ export async function handleFetch(url = '', method = '', body = {}, callback = (
 			callback(res)
 		})
 		.catch(err => {
+			// console.log(err)
 			errorhandler()
 		})
 	}
@@ -93,12 +76,6 @@ export function getLastSeen(timestamp) {
 
 		return day
 	}
-}
-
-export function assertChar(input) {
-	const match = input.match(/[a-z0-9]/)
-	if (match === null) return false
-	else true 
 }
 
 export function assert(obj) {

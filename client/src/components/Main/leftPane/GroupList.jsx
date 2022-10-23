@@ -22,7 +22,7 @@ import ChatActions from '../ChatActions'
 import TypingSignal from '../TypingSignal'
 
 import {setComponents} from '../../../Redux/features/componentSlice'
-import { setSelectedGroup, fetchGroupChats, setFetchedGroup, fetchChatsFromLS } from '../../../Redux/features/groupSlice'
+import { setSelectedGroup, storeGroupChats, setFetchedGroup, fetchChatsFromLS } from '../../../Redux/features/groupSlice'
 import { setSelectedUser } from '../../../Redux/features/otherSlice'
 import { 
 	resetUnread, 
@@ -34,6 +34,7 @@ import {
 
 import { assert, getDateValue, handleFetch} from '../../../lib/script'
 import emit from '../../../sockets/outgoing'
+import { fetchGroupChats } from '../../../api/group-chat'
 
 const useStyles = makeStyles({
 	listItem: {
@@ -185,11 +186,7 @@ function GroupList ({
 		if (isNull || isCurrentSelectedGroup) return 
 
 		if (assert(unread)) {
-			handleFetch(
-				`chat/clearGroupUnread/${id}/${_id}`,
-				'delete',
-			)
-
+			clearGroupUnread({groupId: _id})
 			dispatch(updateGroupField({
 				_id,
 				field: {
@@ -201,7 +198,8 @@ function GroupList ({
 		if (isFetched) {
 			handleDispatch()
 		} else {
-			dispatch(fetchGroupChats({id, _id})).then(() => {
+			fetchGroupChats({groupId: _id}, res => {
+				storeGroupChats(res)
 				dispatch(setFetchedGroup(_id))
 				handleDispatch()
 			})

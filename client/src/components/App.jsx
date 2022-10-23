@@ -1,7 +1,4 @@
 import React from 'react'
-import SignUp from './signup/Signup'
-import Login from './login/Login'
-import Main from './main/Main'
 import '../stylesheet/main.css'
 import { useSelector, useDispatch } from 'react-redux'
 import { Route, Routes, useNavigate } from 'react-router-dom'
@@ -10,8 +7,13 @@ import SafeComponent from './SafeComponent'
 
 import RightPane from './main/rightPane/RightPane'
 
-import {getWindowHeight} from '../lib/script'
 import HelperAlert from './HelperAlert'
+
+import Auth from './auth/Auth' 
+import SignUp from './auth/signup/Signup'
+import Login from './auth/login/Login'
+
+import Main from './main/Main'
 
 const theme = createTheme({
 	palette: {
@@ -33,23 +35,25 @@ const App = () => {
 	const navigate = useNavigate()
 
 	React.useEffect(() => {
-		if (!JSON.parse(localStorage.getItem('details'))) {
-			navigate('/login')
+		if (!JSON.parse(sessionStorage.getItem('jwt')) || !JSON.parse(localStorage.getItem('user'))) {
+			navigate('/auth/login')
 		}
 	}, [])
 	
 	return (
 		<ThemeProvider theme={theme}>
-			<section style={{height: getWindowHeight() + 'px'}} >
+			<section>
 					{/*<SafeComponent>*/}
 						<Routes>
-							{JSON.parse(localStorage.getItem('details')) && 
+							{JSON.parse(sessionStorage.getItem('jwt')) && 
 								<Route path='/' element={<Main /> } >
 									<Route path='/' element={<RightPane />} />
 								</Route>
 							}
-							<Route path='/signup' element={<SignUp /> } />
-							<Route path='/login' element={<Login /> } />
+							<Route path='/auth' element={<Auth />}>
+								<Route path='/auth/signup' exact element={<SignUp /> } />
+								<Route path='/auth/login' element={<Login /> } />
+							</Route>
 						</Routes>
 					{/*</SafeComponent>*/}
 				<HelperAlert />

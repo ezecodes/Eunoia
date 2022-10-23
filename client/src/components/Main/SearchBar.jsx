@@ -9,6 +9,7 @@ const useStyles = makeStyles({
 		border: '1px solid #cdd3dd',
 		padding: '5px 15px',
 		borderRadius: '100px',
+		margin: '0 9px',
 		'& .MuiInputBase-input': {
 			fontSize: '.9rem',
 			color: '#0d2c66',

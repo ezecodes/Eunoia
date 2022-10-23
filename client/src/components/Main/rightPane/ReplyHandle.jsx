@@ -2,7 +2,7 @@ import React from 'react'
 import { makeStyles } from '@material-ui/core/styles';
 import Slide from '@material-ui/core/Slide';
 import CloseIcon from '@material-ui/icons/Close';
-
+import { useSelector } from 'react-redux'
 
 const useStyles = makeStyles({
 	replyHandel: {
@@ -34,7 +34,7 @@ const useStyles = makeStyles({
 })
 
 function ReplyHandle ({open, sender, message, closeReplyHandle, handleChatHighlight}) {
-	const {username, id} = JSON.parse(localStorage.getItem('details'))
+	const {username, id} = useSelector(state => state.account.account)
 	const classes = useStyles()
 	return (
 		<Slide in={open} direction='up'>

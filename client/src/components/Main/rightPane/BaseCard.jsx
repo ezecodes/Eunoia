@@ -7,8 +7,8 @@ import IconButton from '@material-ui/core/IconButton'
 
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 
-import { getWindowHeight, assert } from '../../../lib/script'
-
+import { assert } from '../../../lib/script'
+import { useWinHeight } from '../../../hooks/hooks'
 import { setComponents} from '../../../Redux/features/componentSlice'
 import { setSelectedUser } from '../../../Redux/features/otherSlice'
 import { setSelectedGroup } from '../../../Redux/features/groupSlice'
@@ -92,6 +92,7 @@ const useStyles = makeStyles({
 				background: common.white,
 				margin: 0,
 				padding: '11px 10px',
+				boxShadow: '0 0 9px 0px #0000000d',
 
 				'& textarea': {
 					height: '19px'
@@ -138,6 +139,7 @@ const BaseCard = ({children}) => {
 	const classes = useStyles()
 	const dispatch = useDispatch()
 	const selectedGroup = useSelector(state => state.groups.selectedGroup)
+	const height = useWinHeight()
 	const handleComponent = () => {
 		dispatch(setSelectedUser({}))
 		assert(selectedGroup) && dispatch(setSelectedGroup({}))
@@ -149,7 +151,7 @@ const BaseCard = ({children}) => {
 		<Card 
 			className={classes.card}
       style={{
-      	height: `${getWindowHeight()}px`
+      	height: `${height}px`
       }}
 		>
 			<IconButton className={classes.backBtn} onClick={() => handleComponent()} >

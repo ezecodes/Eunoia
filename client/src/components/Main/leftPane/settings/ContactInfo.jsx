@@ -52,7 +52,7 @@ import { setNewSocial, handleDeleteSocial } from '../../../../Redux/features/acc
 
 import Header from '../../Header'
 import NetworkProgress from '../../NetworkProgress'
-import { assert, handleFetch } from '../../../../lib/script'
+import { updateSocials, deleteSocial } from '../../../../api/account'
 
 const useStyles = makeStyles({
 	contactInfo: {
@@ -135,7 +135,7 @@ const actions = [
 ]
 
 const ContactInfo = ({className}) => {
-	const {id} = JSON.parse(localStorage.getItem('details'))
+	const {id} = useSelector(state => state.account.account)
 	const dispatch = useDispatch()
 	const classes = useStyles()
 	const [showDial, setDial] = React.useState(false)
@@ -215,20 +215,19 @@ const ContactInfo = ({className}) => {
   	setError({...value})
 
   	if (!value.error && online) {
-  		handleFetch(`/account/updateSocials/${id}`, 'put', newSocial.social, () => {})
-
+  		updateSocials(newSocial.social, () => {})
   		dispatch(setNewSocial(newSocial.social))
   	}
   }
 
   const changePrivacy = (social) => {
-  	handleFetch(`/account/updateSocials/${id}`, 'put', social)
+  	updateSocials(social, () => {})
   	dispatch(setNewSocial(social))
   	setAlert({show: true, message: 'Privacy updated'})
   }
 
-  const deleteSocial = (social) => {
-  	handleFetch(`/account/deleteSocial/${id}`, 'delete', social, () => {})
+  const _deleteSocial = (social) => {
+  	deleteSocial(social, () => {})
   	dispatch(handleDeleteSocial(social))
   	setAlert({show: true, message: 'Contact deleted successfully'})
   }
@@ -319,7 +318,7 @@ const ContactInfo = ({className}) => {
 										    	<IconButton onClick={() => addSocial({name: social.name, icon})}>
 										    		<EditIcon />
 										    	</IconButton>
-										  		<IconButton onClick={() => deleteSocial(social)} >
+										  		<IconButton onClick={() => _deleteSocial(social)} >
 										    		<DeleteIcon />
 										    	</IconButton>
 											  </ListItemSecondaryAction>

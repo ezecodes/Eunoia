@@ -13,15 +13,19 @@ const {
 	setNotify
 } = require('../controllers/account.js')
 
-accountRoute.put('/updateSocials/:id', updateSocials)
-accountRoute.put('/matchPassword/:id', matchPassword)
-accountRoute.put('/updatePassword/:id', updatePassword)
-accountRoute.put('/setNotify/:id', setNotify)
-accountRoute.put('/saveProfileInfo/:id', saveProfileInfo)
+const { requireAuth } = require('../helpers/auth-helpers')
 
-accountRoute.delete('/deleteSocial/:id', deleteSocial)
+accountRoute.all('*', requireAuth)
 
-accountRoute.get('/accountData/:id', getAccount)
-accountRoute.get('/users/:id', getUsers)
+accountRoute.put('/updateSocials', updateSocials)
+accountRoute.put('/matchPassword', matchPassword)
+accountRoute.put('/updatePassword', updatePassword)
+accountRoute.put('/setNotify', setNotify)
+accountRoute.put('/saveProfileInfo', saveProfileInfo)
+
+accountRoute.delete('/deleteSocial', deleteSocial)
+
+accountRoute.get('/accountData', getAccount)
+accountRoute.get('/users', getUsers)
 
 module.exports = accountRoute

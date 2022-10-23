@@ -3,8 +3,9 @@ import { useSelector, useDispatch } from 'react-redux'
 import { Outlet } from 'react-router-dom'
 import { makeStyles } from '@material-ui/core/styles';
 import grey from '@material-ui/core/colors/grey';
+import { useWinHeight } from '../../hooks/hooks'
 import {
-	fetchRecentChats, 
+	storeRecentChats,
 	setUnread, 
 	updateRecentChats, 
 	syncRecentsWithDeleted, 
@@ -14,14 +15,14 @@ import {
 	updateGroupTypingStatusInRecent, 
 	updateUserTypingStatus,
 	syncRecentGroupWithDeleted,
- 	fetchGroupInfo,
-	setGroupUnread,
+	storeGroupUnread,
+	storeGroupInfo,
 	saveGroupNameInRecent
 } from '../../Redux/features/recentChatsSlice'
 
-import { fetchActiveUsers, setActiveOnline, setActiveDisconnect, setTypingStatus } from '../../Redux/features/activeUsersSlice'
+import { storeActiveUsers, setActiveOnline, setActiveDisconnect, setTypingStatus } from '../../Redux/features/activeUsersSlice'
 
-import { fetchAccountData, setOnline } from '../../Redux/features/accountSlice'
+import { storeAccountData, setOnline } from '../../Redux/features/accountSlice'
 
 import { storeReceivedChat, setChatRead, handleStarredChat, performChatDelete } from '../../Redux/features/chatSlice'
 
@@ -42,6 +43,12 @@ import { assert, handleFetch } from '../../lib/script'
 import init, { socket } from '../../sockets/init'
 import LeftPane from './leftPane/LeftPane'
 
+import { getAccountData } from '../../api/account'
+import { getRecentChats } from '../../api/recent-chat'
+import { getActiveUsers } from '../../api/active-users'
+import { fetchGroupInfo, setGroupUnread } from '../../api/group-chat'
+import { saveUnreadChat } from '../../api/chat'
+
 const useStyles = makeStyles({
 	main: {
 		background: 'linear-gradient(266deg, #e9e9e9, #d3920026)' ,
@@ -50,30 +57,34 @@ const useStyles = makeStyles({
 	}
 })
 
-const Main = () => {
-	const {id, username} = JSON.parse(localStorage.getItem('details'))
+const Main = ({user}) => {
+	const {id, username} = useSelector(state => state.account.account)
 	const classes = useStyles()
 	const dispatch = useDispatch()
 	const selectedUser = useSelector(state => state.other.currentSelectedUser)
 	const {leftPane, rightPane} = useSelector(state => state.components)
 	const activeUsers = useSelector(state => state.activeUsers.activeUsers)
 	const selectedGroup = useSelector(state => state.groups.selectedGroup)
+	const fetchedUsers = useSelector(state => state.other.fetched)
+	const fetchedGroups = useSelector(state => state.groups.fetchedGroups)
+	const winHeight = useWinHeight()
 
 	const { useEffect } = React
-	useEffect(() => {
-		// automatically refresh the page when the account details changed
-		if (!assert(JSON.parse(localStorage.getItem('details')))) {
-			document.location = '/'
-		}
-	}, [JSON.parse(localStorage.getItem('details'))])
 
 	useEffect(() => {
 		init({token: id, username})
 
-		// emit 'getOnlineUsers after fetch to prevent conflict'
-		dispatch(fetchAccountData(id))
-		dispatch(fetchRecentChats(id)).then(() => socket.emit('getOnileUsers'))
-		dispatch(fetchActiveUsers(id)).then(() => socket.emit('getOnileUsers'))
+		getAccountData((res) => {
+			dispatch(storeAccountData(res))
+		})
+		getRecentChats(res => {
+			dispatch(storeRecentChats(res))
+			socket.emit('getOnileUsers')
+		})
+		getActiveUsers(res => {
+			dispatch(storeActiveUsers(res))
+			socket.emit('getOnileUsers')
+		})
 	}, [])
 
 	socket.off('connect').on('connect', () => {
@@ -101,7 +112,9 @@ const Main = () => {
 	})
 
 	socket.off('fetchGroupInfo').on('fetchGroupInfo', ({_id}) => {
-		dispatch(fetchGroupInfo({token: id, _id}))
+		fetchGroupInfo(_id, res => {
+			dispatch(storeGroupInfo(res))
+		})
 	})
 
 	socket.off('setGroupSettings').on('setGroupSettings', ({_id, settings}) => {
@@ -111,14 +124,18 @@ const Main = () => {
 		dispatch(setUpdatedField({_id, field: {description}}))
 	})
 	socket.off('setGroupName').on('setGroupName', ({_id, name}) => {
-		dispatch(fetchGroupInfo({token: id, _id}))
+		fetchGroupInfo(_id, res => {
+			dispatch(storeGroupInfo(res))
+		})
 		dispatch(setUpdatedField({_id, field: {name}})) 
 	})
 	socket.off('setGroupAdmins').on('setGroupAdmins', ({_id, admins}) => {
 		dispatch(setUpdatedField({_id, field: {admins}})) 
 	})
 	socket.off('addGroupParticipants').on('addGroupParticipants', ({_id, participants}) => {
-		dispatch(fetchGroupInfo({token: id, _id}))
+		fetchGroupInfo(_id, res => {
+			dispatch(storeGroupInfo(res))
+		})
 		dispatch(setUpdatedField({_id, field: {participants}}))
 	})
 	socket.off('removeGroupUser').on('removeGroupUser', ({_id, participants, admins}) => {
@@ -127,15 +144,14 @@ const Main = () => {
 
 	socket.off('chatFromGroup').on('chatFromGroup', ({_id, chat}) => {
 		dispatch(storeReceivedGroupChat({_id, chat}))
-		dispatch(updateRecentGroupChats({_id, lastChat: chat}))
 
 		if ((assert(selectedGroup) && selectedGroup._id !== _id) || !assert(selectedGroup)) {
-			handleFetch(
-				`chat/setGroupUnread/${id}/${_id}/${chat.chatId}`,
-				'put'
-			)
+			sendGroupUnread({groupId: _id, chatId: chat.chatId})
 			dispatch(setGroupUnread({_id, chatId: chat.chatId}))
 		} 
+		
+		if (fetchedGroups.some(i => i === _id)) return  
+		dispatch(updateRecentGroupChats({_id, lastChat: chat}))
 	})
 
 	socket.off('deleteGroupChat').on('deleteGroupChat', ({_id, chatId}) => {
@@ -151,6 +167,11 @@ const Main = () => {
 	socket.off('chatFromUser').on('chatFromUser', chat => {
 		function handleDispatch() {
 			dispatch(storeReceivedChat(chat))
+
+			/// checks if messages with the sender has been fetched, else update recentChats
+			// N/B updateRecentChats is also called/referenced at messages useEffect
+			if (fetchedUsers.some(i => i.username === chat.sender)) return  
+
 			dispatch(updateRecentChats({
 				username: chat.sender,
 				lastChat: chat.message,
@@ -160,18 +181,15 @@ const Main = () => {
 		if (activeUsers.find(i => i.username === chat.sender) !== undefined) {
 			handleDispatch()
 		} else {
-			dispatch(fetchActiveUsers(id)).then(() => {
+			getActiveUsers(res => {
+				storeActiveUsers(res)
 				socket.emit('getOnileUsers')
 				handleDispatch()
 			})
-
 		}
 
 		if (!assert(selectedUser) || selectedUser.username !== chat.sender) {
-			handleFetch(
-				`chat/saveUnread/${id}/${chat.sender}/${chat.message.chatId}`,
-				'put',
-			)
+			saveUnreadChat({sender: chat.sender, chatId: chat.message.chatId})
 			dispatch(setUnread({friendsName: chat.sender, chatId: chat.message.chatId}))
 		}
 		if (assert(selectedUser) && selectedUser.username === chat.sender) {
@@ -193,7 +211,9 @@ const Main = () => {
 	})
 
 	return (
-		<section className={classes.main} >
+		<section className={classes.main} style={{
+			height: winHeight + 'px'
+		}}>
 			{leftPane && <LeftPane />}
 			<Outlet />
 		</section>

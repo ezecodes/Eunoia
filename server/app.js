@@ -1,16 +1,18 @@
 const express = require('express')
 const app = express()
 const path = require('path')
+const cookieParser = require('cookie-parser')
 
-const userRoute = require('./src/routes/userRoute.js')
-const accountRoute = require('./src/routes/accountRoute.js')
-const chatRoute = require('./src/routes/chatRoute.js')
+const authRoute = require('./src/routes/authRoute')
+const accountRoute = require('./src/routes/accountRoute')
+const chatRoute = require('./src/routes/chatRoute')
 
 app.use(express.json())
+app.use(cookieParser())
 
 app.disable('x-powered-by')
 
-app.use('/user/', userRoute)
+app.use('/auth/', authRoute)
 app.use('/account/', accountRoute)
 app.use('/chat/', chatRoute)
 

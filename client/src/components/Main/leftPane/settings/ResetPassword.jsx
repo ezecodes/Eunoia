@@ -26,6 +26,7 @@ import { useDispatch, useSelector } from 'react-redux'
 
 import Header from '../../Header'
 import NetworkProgress from '../../NetworkProgress'
+import { matchPassword, resetPassword } from '../../../../api/account'
 
 const useStyles = makeStyles({
 	body: {
@@ -66,98 +67,74 @@ const useStyles = makeStyles({
 })
 
 const ResetPassword = ({className}) => {
-	const {id} = JSON.parse(localStorage.getItem('details'))
+	const {id} = useSelector(state => state.account.account)
 	const dispatch = useDispatch()
 	const classes = useStyles()
 	const [open, setOpen] = React.useState(false)
 	const [passwordUpdate, setUpdate] = React.useState(false)
 
 	const [showPassword, handlePV] = React.useState({
-		former: false, _new: false, confirm: false
+		former: false, newPassword: false, confirmPassword: false
 	})
 
 	const [values, setInputs] = React.useState({
-		former: '', _new: '', confirm: ''
+		former: '', newPassword: '', confirmPassword: ''
 	})
 	const [error, setError] = React.useState({
-		former: false, _new: false, confirm: false
+		former: false, newPassword: false, confirmPassword: false
 	})
 	const [help, setHelp] = React.useState({
-		former: '', _new: '', confirm: ''
+		former: '', newPassword: '', confirmPassword: ''
 	})
 	const handleClose = () => {
 		setOpen(false)
 	}
-	const updatePassword  = async (val) => {
+	const updatePassword  = async (obj) => {
 		setUpdate(true)
-		fetch(`/account/updatePassword/${id}`, {
-			method: 'put',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify(val)
-		}).then(res => res.json())
-		.then(res => {
-			if (res.type === 'success') {
-				setUpdate(false)
-				setOpen(true)
-				setInputs({...values, former: '', _new: '', confirm: ''})
-				// dispatch(setComponents({component: 'settings', value: true}))
-
-			}
-			// console.log(res)
-		})
-	}
-	const matchPassword = async (val) => {
-		setUpdate(true)
-		return await fetch(`/account/matchPassword/${id}`, {
-			method: 'put',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify(val)
-		})
-		.then(res => res.json())
-		.then(res => {
+		setInputs({...values, former: '', newPassword: '', confirmPassword: ''})
+		resetPassword(obj, res => {
 			setUpdate(false)
-			if (res.type === 'error') {
-				setError({...error, former: true})
-				setHelp({...help, former: 'Enter a valid password'})
-			} 
-			if (res.type === 'success') {
-				const {_new, confirm} = values
-				if (_new === confirm) {
-					if (_new.length <= 4) {
-						setError({...error, confirm: true, _new: true})
-						setHelp({...help, confirm: 'Password is too short. Password length should be more than 5 characters'})
-					} else {
-						//update 
-						updatePassword({value: confirm})
-					}
-				} else {
-					setError({...error, confirm: true, _new: true})
-					setHelp({...help, confirm: 'Passwords do not match'})
-				}
-			}
-
+			setOpen(true)
 		})
 	}
-	const performReset = (e) => {
-		e.preventDefault()
-		const { former } = values
-		if (former !== '') matchPassword({value: former})
-	}	
+	const _matchPassword = async (val) => {
+		setUpdate(true)
+		const {former, newPassword, confirmPassword} = values
+		matchPassword({former}, res => {
+			if (res.error) {
+				let keys = Object.keys(res.error)
+				let errorObj = {}
+				keys.map(i => errorObj[i] = true)
+				setError({...error, ...errorObj})
+				setHelp({...help, ...res.error})
+				return
+			}
+			if (newPassword !== confirmPassword) {
+				setError({...error, confirmPassword: true, newPassword: true})
+				setHelp({...help, confirmPassword: 'Passwords do not match'})
+				return
+			}
+			if (newPassword.length <= 4) {
+				setError({...error, confirmPassword: true, newPassword: true})
+				setHelp({...help, confirmPassword: 'Password is too short. Password length should be more than 5 characters'})
+				return
+			}
+			updatePassword(values)
+		})
+
+	}
+	
 	const setComp = (obj) => {
 		dispatch(setComponents(obj))
 	}
 
 	const setValue = (input, ele) => {
-		setError({...error, former: false, _new: false, confirm: false})
-		setHelp({...help, former: '', _new: '', confirm: ''})
+		setError({...error, former: false, newPassword: false, confirmPassword: false})
+		setHelp({...help, former: '', newPassword: '', confirmPassword: ''})
 
 		if (ele === 'former') setInputs({...values, former: input})
-		if (ele === '_new') setInputs({...values, _new: input})
-		if (ele === 'confirm') setInputs({...values, confirm: input})
+		if (ele === 'newPassword') setInputs({...values, newPassword: input})
+		if (ele === 'confirmPassword') setInputs({...values, confirmPassword: input})
 	}
 
 	const setPasswordVisibility = which => {
@@ -176,7 +153,7 @@ const ResetPassword = ({className}) => {
 					}
 				</Header>
 				<div className={classes.body}>
-					<form onSubmit={performReset} className={classes.form} >
+					<form onSubmit={_matchPassword} className={classes.form} >
 						<TextField 
 							variant='outlined'
 							onChange={e => setValue(e.target.value, 'former')} 
@@ -202,42 +179,42 @@ const ResetPassword = ({className}) => {
 						/>
 						<TextField variant='outlined' 
 							className={classes.input}
-							onChange={e => setValue(e.target.value, '_new')} 
-							value={values._new} 
+							onChange={e => setValue(e.target.value, 'newPassword')} 
+							value={values.newPassword} 
 							placeholder='New password' type='password'
 							required
 							autoComplete='new-password'
-							error={error._new}
-						  type={showPassword._new ? 'text' : 'password'}
+							error={error.newPassword}
+						  type={showPassword.newPassword ? 'text' : 'password'}
 							InputProps={{
 								startAdornment: <InputAdornment position='start'>
 					    		<LockSharpIcon color='secondary' />
 					    	</InputAdornment>,
 					    	endAdornment: <InputAdornment position='end' >
 					    		<IconButton color='secondary' aria-label='Toggle password visibility' 
-					    			onClick={() => setPasswordVisibility('_new')}>
-					    			{showPassword._new ? <Visibility /> : <VisibilityOff />}
+					    			onClick={() => setPasswordVisibility('newPassword')}>
+					    			{showPassword.newPassword ? <Visibility /> : <VisibilityOff />}
 					    		</IconButton>
 					    	</InputAdornment>
 					    }}
 						/>
 						<TextField variant='outlined' 
 							className={classes.input} 
-							onChange={e => setValue(e.target.value, 'confirm')} value={values.confirm} 
-							placeholder='Confirm password' type='password'
+							onChange={e => setValue(e.target.value, 'confirmPassword')} value={values.confirmPassword} 
+							placeholder='ConfirmPassword password' type='password'
 							required
 							autoComplete='new-password'
-							error={error.confirm}
-							helperText={help.confirm}
-						  type={showPassword.confirm ? 'text' : 'password'}
+							error={error.confirmPassword}
+							helperText={help.confirmPassword}
+						  type={showPassword.confirmPassword ? 'text' : 'password'}
 							InputProps={{
 								startAdornment: <InputAdornment position='start'>
 					    		<RepeatIcon color='secondary' />
 					    	</InputAdornment>,
 					    	endAdornment: <InputAdornment position='end' >
 					    		<IconButton color='secondary' aria-label='Toggle password visibility' 
-					    			onClick={() => setPasswordVisibility('confirm')}>
-					    			{showPassword.confirm ? <Visibility /> : <VisibilityOff />}
+					    			onClick={() => setPasswordVisibility('confirmPassword')}>
+					    			{showPassword.confirmPassword ? <Visibility /> : <VisibilityOff />}
 					    		</IconButton>
 					    	</InputAdornment>
 					    }}

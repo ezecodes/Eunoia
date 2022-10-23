@@ -1,22 +1,14 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 
-export const fetchAccountData = createAsyncThunk(
-	'fetchAccountData',
-	async (id) => {
-		const response = await fetch(`/account/accountData/${id}`)
-		return response.json()
-	}
-)
-
 const initialState = {
 	account: {
 		showLoader: true,
-		...JSON.parse(localStorage.getItem('details')),
 		socketId: '',
 		online: false,
 		bio: '',
 		socials: [],
 		createdGroups: [],
+		...JSON.parse(localStorage.getItem('user')),
 	}
 }
 
@@ -49,17 +41,13 @@ const accountSlice = createSlice({
 		},
 		profileUpdate: (state, action) => {
 			state.account = {...state.account, ...action.payload}
+		},
+		storeAccountData: (state, action) => {
+			state.account = {...state.account, ...action.payload}
 		}
 	},
 	extraReducers: builder => {
-		builder.addCase(fetchAccountData.fulfilled, (state, action) => {
-			state.account = {...state.account, ...action.payload}
-			state.account.showLoader = false
-		})
-		.addCase(fetchAccountData.rejected, () => {
-			localStorage.clear()
-			document.location = '/'
-		})
+	
 	}
 
 })
@@ -70,6 +58,7 @@ export const {
 	handleDeleteSocial,
 	editAccountInfo,
 	profileUpdate,
+	storeAccountData
 } = accountSlice.actions
 
 export default accountSlice.reducer

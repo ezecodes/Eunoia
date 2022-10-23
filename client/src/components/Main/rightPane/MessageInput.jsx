@@ -7,10 +7,10 @@ import InputAdornment from '@material-ui/core/InputAdornment';
 import SendIcon from '@material-ui/icons/Send';
 
 
-function MessageInput({value, sendMessage = () => {}, handleTextInput = () => {}}) {
+function MessageInput({inputValue, sendMessage = () => {}, handleTextInput = () => {}}) {
 	const listenForEnter = (e) => {
+		e.preventDefault()
 		if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey) {
-			e.preventDefault()
 			sendMessage()
 		}
 	}
@@ -20,7 +20,7 @@ function MessageInput({value, sendMessage = () => {}, handleTextInput = () => {}
   		placeholder='Type your messages'
   		onChange={({target}) => handleTextInput(target.value)}
   		maxRows={4}
-  		value={value}
+  		value={inputValue}
   		onKeyDown={listenForEnter}
   		minRows={1}
   		endAdornment={

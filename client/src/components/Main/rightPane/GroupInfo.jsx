@@ -33,7 +33,7 @@ import ChatActions from '../ChatActions'
 
 import { setComponents} from '../../../Redux/features/componentSlice'
 
-import { getWindowHeight, handleFetch, retrieveDate } from '../../../lib/script'
+import { retrieveDate } from '../../../lib/script'
 import emit from '../../../sockets/outgoing'
 
 const useStyles = makeStyles({
@@ -298,8 +298,7 @@ function ListsForAdminsOnly ({
 function GroupInfo({participants, _id, name, description, show, createdBy, admins, settings}) {
 	const classes = useStyles()
 	const dispatch = useDispatch()
-	const accountName = useSelector(state => state.account.account.username)
-	const id = useSelector(state => state.account.account.id)
+	const {username: accountName, id} = useSelector(state => state.account.account)
 	const [open, setOpen] = React.useState(false)
 	const [loading, setLoader] = React.useState('')
 	const activeUsers = useSelector(state => state.activeUsers.activeUsers)
@@ -312,11 +311,6 @@ function GroupInfo({participants, _id, name, description, show, createdBy, admin
 		}
 	})
 
-	React.useEffect(() => {
-		// console.log(admins)
-		// console.log(admins[admins.length -1])
-	}, [admins])
-	
 	const setDisplay = () => dispatch(setComponents({component: 'gRoot', parent: 'gInfos', value: false}))
 		
 	const addGroupMembers = (username) => {

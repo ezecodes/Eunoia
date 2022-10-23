@@ -1,25 +1,4 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-
-export const fetchRecentChats = createAsyncThunk(
-	'fetchRecentChats',
-	async (id) => {
-		const response = await fetch(`/chat/recentChats/${id}`)
-		if (response.ok) {
-			const recentChats = await response.json()
-			return recentChats
-		}
-	}
-)
-export const fetchGroupInfo = createAsyncThunk(
-	'fetchGroupInfo',
-	async ({token, _id}) => {
-		const response = await fetch(`/chat/fetchGroupInfo/${token}/${_id}/`)
-		if (response.ok) {
-			const specific = await response.json()
-			return specific
-		}
-	}
-)
+import { createSlice } from '@reduxjs/toolkit'
 
 function traverse(arr) {
 	let starred = []
@@ -242,7 +221,7 @@ const recentChatsSlice = createSlice({
 			state.groupToBeDeleted = action.payload
 		},
 
-		setGroupUnread: (state, action) => {
+		storeGroupUnread: (state, action) => {
 			const {_id, chatId} = action.payload
 			const find = state.recentChats.findIndex(i => i.chatType === 'group' && i._id === _id)
 			if (find !== -1) {
@@ -256,6 +235,32 @@ const recentChatsSlice = createSlice({
 			// if (find !== -1) {
 			// 	state.recentChats[find].group.groupName = groupName
 			// }
+		},
+
+		storeRecentChats: (state, action) => {
+			let allChats = action.payload.recentChats
+			allChats.forEach((obj, i) => {
+				if (obj.chatType === 'group') {
+					allChats[i] = {
+						...obj,
+						typing: [],
+					}
+				} else {
+					allChats[i] = {
+						...obj,
+						typing: false
+					}
+				}
+
+				if (obj.messages) {
+					allChats[i].lastChat = obj.messages[0] || {}
+				}
+				allChats[i].visible = true
+				delete allChats[i].messages
+			})
+
+			state.recentChats = traverse(allChats)
+			state.showRecentUsersLoader = false
 		},
 
 		exitGroup: (state, action) => {
@@ -286,42 +291,11 @@ const recentChatsSlice = createSlice({
 					}
 				}
 			})
-		}
-	},
-	extraReducers: builder => {
-		builder.addCase(fetchRecentChats.pending, (state, action) => {
-			state.showRecentUsersLoader = true
-		})
-		.addCase(fetchRecentChats.fulfilled, (state, action) => {
-			let allChats = action.payload.recentChats
-			allChats.forEach((obj, i) => {
-				if (obj.chatType === 'group') {
-					allChats[i] = {
-						...obj,
-						typing: [],
-					}
-				} else {
-					allChats[i] = {
-						...obj,
-						typing: false
-					}
-				}
+		},
 
-				if (obj.messages) {
-					allChats[i].lastChat = obj.messages[0] || {}
-				}
-				allChats[i].visible = true
-				delete allChats[i].messages
-			})
-
-			state.recentChats = traverse(allChats)
-			state.showRecentUsersLoader = false
-		})
-		.addCase(fetchGroupInfo.fulfilled, (state, action) => {
+		storeGroupInfo: (state, action) => {
 			let modifiedGroup = action.payload
-
 			const find = state.recentChats.findIndex(i => i.chatType === 'group' && i._id === modifiedGroup._id)
-
 			if (find !== -1) {
 				state.recentChats[find] = {
 					...state.recentChats[find],
@@ -336,7 +310,10 @@ const recentChatsSlice = createSlice({
 			}
 
 			state.recentChats = traverse(state.recentChats)
-		})
+		}
+	},
+	extraReducers: builder => {
+	
 	}
 })
 
@@ -355,13 +332,15 @@ export const {
 	syncRecentsWithRead,
 	saveGroupNameInRecent,
 	updateUserTypingStatus,
-	setGroupUnread,
+	storeGroupUnread,
 	updateRecentGroupChats,
 	updateGroupTypingStatusInRecent,
 	exitGroup,
 	updateGroupField,
 	syncRecentGroupWithDeleted,
 	starGroup,
+	storeGroupInfo,
+	storeRecentChats,
 	setRecentDisconnect
 } = recentChatsSlice.actions
 

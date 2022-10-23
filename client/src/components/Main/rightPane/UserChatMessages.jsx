@@ -295,9 +295,17 @@ const ChatSingle = ({chat, isFirst, isLast}) => {
 	)
 }
 
+
+function sender(chat = {sender: ''}) {
+	return chat.sender
+}
+
+
 const ChatsByDate = ({chat}) => {
 	const classes = useStyles()
 	const day = new Date().toDateString().slice(0, -5)
+	const length = chat.chats.length
+	let indicators
 	
 	return (
 		<div >
@@ -310,32 +318,19 @@ const ChatsByDate = ({chat}) => {
 				{
 					chat.chats.length > 0 &&
 						chat.chats.map((message, i) => {
-
-							let indicators = {isFirst: false, isLast: false}
+							let nextChatSender = sender(chat.chats.at(i + 1)),
+								prevChatSender = sender(chat.chats.at(i - 1)),
+								currChatSender = message.sender || '',
+								indicators = {isFirst: false, isLast: false}
 
 							if (i === 0) indicators.isFirst = true
-							else if (i > 0) {
-								if (message.sender !== chat.chats[i-1].sender) {
-									indicators.isFirst = true
-								} 
-								if (i === chat.chats.length-1) indicators.isLast = true
-								if (i < chat.chats.length-1) {
+							if (i === length -1) indicators.isLast = true
 
-									if (message.sender !== chat.chats[i+1].sender) {
-										indicators.isLast = true
-									}
-
-									if (message.sender !== chat.chats[i-1].sender && 
-										message.sender === chat.chats[i+1].sender) {
-										indicators.isFirst = true
-									}
-
-									if (message.sender !== chat.chats[i-1].sender && 
-										message.sender !== chat.chats[i+1].sender) {
-										indicators = {isFirst: true, isLast: true}
-									}
-								}
-									
+							if (prevChatSender !== currChatSender) {
+								indicators.isFirst = true
+							} 
+							if (nextChatSender !== currChatSender) {
+								indicators.isLast = true
 							}
 							
 							return (
@@ -348,9 +343,6 @@ const ChatsByDate = ({chat}) => {
 	)
 }
 
-const determineIndicator = (curr, prev, next) => {
-
-}
 
 const UserChatMessages = ({chats}) => {
 	/** Index chats by date **/

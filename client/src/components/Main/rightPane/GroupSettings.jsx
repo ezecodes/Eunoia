@@ -121,7 +121,7 @@ function GroupSettings({_id, name, description, settings, isAdmin}) {
   		closeComp()
   		return false
   	}
-  	if (nameInput.value === name) return false
+  	if (nameInput.value.trim() === name) return false
 		if (nameInput.value.match(/[0-9a-z]/ig) === null) {
 			nameInput.value = name
 			closeComp()
@@ -156,7 +156,7 @@ function GroupSettings({_id, name, description, settings, isAdmin}) {
   		return false
   	}
 
-		if (descInput.value === description) return false
+		if (descInput.value.trim() === description) return false
 		setLoader(true)
 		const _date = new Date()
 		const dateNow = () => _date.getTime()

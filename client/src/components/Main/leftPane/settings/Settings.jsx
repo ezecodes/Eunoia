@@ -62,6 +62,8 @@ import NetworkProgress from '../../NetworkProgress'
 import ProfileEditor from './ProfileEditor'
 
 import { handleFetch } from '../../../../lib/script'
+import { setNotify , logout} from '../../../../api/account'
+import { clearAuth } from '../../../../helpers/auth-helper'
 
 const useStyles = makeStyles((theme) => ({
 	
@@ -186,10 +188,9 @@ const useStyles = makeStyles((theme) => ({
 }))
 
 const Settings = ({className}) => {
-	const {id} = JSON.parse(localStorage.getItem('details'))
 	const classes = useStyles()
 	const dispatch = useDispatch()
-	const { username, displayName, bio, status, email, notifications} = useSelector(state => state.account.account)
+	const { username, id, displayName, bio, status, email, notifications} = useSelector(state => state.account.account)
 	const [showProgress, setProgress] = React.useState(false)
 
 	const [showInput, setInputs] = React.useState({name: false, bio: false})
@@ -231,81 +232,18 @@ const Settings = ({className}) => {
 		setInputs({...showInput, ...input})
 	}
 
-	// const updateProfileName = ({target}) => {
-	// 	const value = target.value
-	// 	clearTimeout(timerToValidateName)
-	// 	updateNameStatus(false)
-
-	// 	if (/[^a-z0-9_ ]/ig.test(value)) {
-	// 		updateNameStatus(false)
-	// 		setInputError({name: true})
-	// 		setHelperText({name: `name cannot contain ${value[value.length-1]}`})
-
-	// 	} else if (value.length < 3) {
-	// 		setNameValue({name: value})
-	// 		setInputError({name: true})
-	// 		setHelperText({name: `name is too short`})
-	// 	} else {
-	// 		setNameValue({name: value})
-	// 		setInputError({name: false})
-	// 		setHelperText({name: ''})
-	// 	}
-
-	// 	if (value === '') {
-	// 		setInputCloseIcon({name: true})
-	// 	} else {
-	// 		if (value.length >= 3 ) {
-	// 			callTimer()
-	// 			setInputCloseIcon({name: false})
-	// 		}	
-	// 	}
-
-	// 	function callTimer() {
-	// 		const newTimer = setTimeout(() => {
-	// 			updateNameStatus(true)
-	// 			handleFetch(`/account/updateName/${id}`, 'put', {newName: target.value}, (res) => {
-	// 				const {type, response} = res
-	// 				updateNameStatus(false)
-	// 				if (type === 'error') {
-	// 					setInputError({name: true})
-	// 					setHelperText({name: response })
-	// 				} else if (type === 'isMax') {
-	// 					setDaysUntil(response)
-	// 					setDialog(true)
-	// 				} else {
-	// 					const login = JSON.parse(localStorage.getItem('details'))
-	// 					localStorage.setItem('details', JSON.stringify({...login, username: response}))
-
-	// 					setInputError({name: false})
-	// 					setHelperText({name: '' })
-	// 					setInputs({name: false})
-	// 					document.location.pathname = ''
-	// 				}
-	// 				res.error && updateNameStatus(false)
-	// 			})
-	// 			setTimer(newTimer)
-				
-	// 		})
-	// 	}
-	// }
-
-	
-	
-
 	const handleNotification = (obj) => {
 		setProgress(true)
-		handleFetch(
-			`/account/setNotify/${id}`,
-			 'put', 
-			 {update: obj}, 
-			 (res) => {
-				dispatch(editAccountInfo(res))
-				setProgress(false)
-			})
+		const req_body = {update: obj}
+		setNotify(req_body, res => {
+			dispatch(editAccountInfo(res))
+			setProgress(false)
+		})
 	}
 	const callToLogout = () => {
-		localStorage.clear()
-		document.location = '/'
+		logout(res => {
+			clearAuth()
+		})
 	}
 
 	const showAvatarPlaceholder = (bool) => {

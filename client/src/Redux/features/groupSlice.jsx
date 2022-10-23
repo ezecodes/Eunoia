@@ -1,21 +1,13 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-
-export const fetchGroupChats = createAsyncThunk('fetchGroupChats', 
-	async ({id, _id}) => {
-		const response = await fetch(`/chat/fetchGroupChats/${id}/${_id}`)
-		if (response.ok) {
-			const messages = await response.json()
-			return messages
-		}
-	}
-)
+import { createSlice } from '@reduxjs/toolkit'
 
 const actionValues = {
 	reply: {open: false},
 	pendingDelete: {},
 	starredChat: {},
 	typing: [],
-	selectedChat: {}
+	selectedChat: {},
+	inputValue: '',
+	scrollPos: ''
 }
 
 const initialState = {
@@ -68,7 +60,7 @@ const groupSlice = createSlice({
 		storeSentGroupChat: (state, action) => {
 			const {_id, chat} = action.payload
 			const find = state.groupChats.findIndex(i => i._id === _id)
-
+			
 			if (find !== -1) {
 				state.groupChats[find].messages.push(chat)
 			}
@@ -149,6 +141,14 @@ const groupSlice = createSlice({
 			}
 		},
 
+		setGroupInput: (state, action) => {
+			const {_id, value} = action.payload
+			const find = state.groupChats.findIndex(i => i._id === _id)
+			if (find !== -1) {
+				state.groupChats[find].actionValues.inputValue = value
+			}
+		},
+
 		performGroupChatDelete: (state, action) => {
 			const {chatId, _id} = action.payload
 			// let prevGroups = JSON.parse(localStorage.getItem('GroupStateOnExit'))
@@ -216,6 +216,16 @@ const groupSlice = createSlice({
 			}
 		},
 
+		storeGroupChats: (state, action) => {
+			const {_id} = action.payload
+			const find = state.groupChats.findIndex(i => i._id === _id)
+			if (find !== -1) {
+				state.groupChats[find] = {actionValues, ...action.payload}
+			} else {
+				state.groupChats.push({...action.payload, actionValues})
+			}
+		},
+
 		setUpdatedField: (state, action) => {
 			const {_id, field} = action.payload
 			const find = state.groupChats.findIndex(i => i._id === _id)
@@ -226,18 +236,7 @@ const groupSlice = createSlice({
 		}
 	},
 	extraReducers: builder => {
-		builder.addCase(fetchGroupChats.pending, (state, action) => {
-
-		})
-		.addCase(fetchGroupChats.fulfilled, (state, action) => {
-			const find = state.groupChats.findIndex(i => i._id === action.payload._id)
-			if (find !== -1) {
-				state.groupChats[find] = {actionValues, ...action.payload}
-			} else {
-				state.groupChats.push({...action.payload, actionValues})
-			}
-			
-		})
+		
 	}
 
 })
@@ -248,6 +247,7 @@ export const {
 	setSelectedGroup,
 	deleteFetched,
 	deleteGroup,
+	storeGroupChats,
 	setFetchedGroup,
 	setGroupChatReply,
 	storeReceivedGroupChat,
@@ -259,6 +259,7 @@ export const {
 	fetchChatsFromLS,
 	setSelectedGroupChat,
 	setHighlighted,
+	setGroupInput,
 	updateGroupTypingStatusInChats,
 	storeSentGroupChat,
 } = groupSlice.actions

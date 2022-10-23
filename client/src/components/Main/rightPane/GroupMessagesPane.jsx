@@ -28,6 +28,7 @@ import {
 	setReply, 
 	setHighlighted, 
 	undoPendingDelete, 
+	setGroupInput,
 	setPendingDelete,
 	setSelectedGroupChat
 } from '../../../Redux/features/groupSlice'
@@ -46,7 +47,7 @@ import UserAvatar from '../UserAvatar'
 import GroupChatMessages from './GroupChatMessages'
 import ReplyHandle from './ReplyHandle'
 
-import { getWindowHeight, assert, getLastSeen, retrieveDate } from '../../../lib/script'
+import { assert, getLastSeen, retrieveDate } from '../../../lib/script'
 import emit from '../../../sockets/outgoing'
 
 const useStyles = makeStyles({
@@ -111,11 +112,10 @@ function GroupMessagesPane ({
 	const classes = useStyles()
 	const inputRef = React.createRef(null)
 
-	const {pendingDelete, reply, typing} = actionValues
+	const {pendingDelete, reply, typing, inputValue} = actionValues
 	const {allowChatForAdminsOnly} = settings
 
 	const {id, username, online} = useSelector(state => state.account.account)
-	const accountIsOnline = useSelector(state => state.account.account.online)
 	const selectedChat = useSelector(state => state.groups.selectedChat)
 
 	const [timerToDelete, setDeleteTimer] = React.useState(null)
@@ -125,13 +125,12 @@ function GroupMessagesPane ({
 	const [timer, setTimer] = React.useState(null)
 	const [isTyping, setTyping] = React.useState(false)
 	const [pos, setPos] = React.useState({})
-	const [inputValue, setInput] = React.useState('')
 
 	let typingArr = typing.filter(i => i.typing).map(i => i.username)
 
 
 	React.useEffect(() => {
-		if (assert(pendingDelete) && accountIsOnline) {
+		if (assert(pendingDelete) && online) {
 			clearTimeout(timerToDelete)
 
 			let newTimerToDelete = setTimeout(() => {
@@ -181,8 +180,8 @@ function GroupMessagesPane ({
 		setTyping(bool)
 	}
 	
-	const handleTextInput = (value) => {
-		setInput(value)
+	const handleTextInput = (input) => {
+		dispatch(setGroupInput({value: input, _id}))
 		clearTimeout(timer)
 
 		const newTimer = setTimeout(() => {
@@ -198,10 +197,11 @@ function GroupMessagesPane ({
 	}
 
 	const sendMessage = () => {
-		if (inputValue.replaceAll(' ', '') === '') return
+		const finalValue = inputValue.trim()
+		if (finalValue.replaceAll(' ', '') === '') return false
 		if (!online) {
 			dispatch(handleAlert({open: true}))
-			return
+			return false
 		}
 
 		const _date = new Date()
@@ -211,24 +211,22 @@ function GroupMessagesPane ({
 		const chatObj = {
 			_id,
 			chat: {
-				message: inputValue,
+				message: finalValue,
 				chatId: thisDate,
 				sender: username,
 				timestamp: retrieveDate(),
 				reply
 			}
-		}
+		}	
+		dispatch(storeSentGroupChat(chatObj))
 		emit('chatFromGroup', chatObj)
-		storeSentGroupChat({
-			_id, chat: chatObj.chat
-		})
 		typing && handleTypingStatus(false)
 		reply.open &&
 		 dispatch(setReply({
 			_id,
 			open: false,
 		}))
-		setInput('')
+		dispatch(setGroupInput({_id, value: ''}))
 	}
 
 	const handleInfo = () => {
@@ -253,7 +251,7 @@ function GroupMessagesPane ({
 	}
 
 	const beginDelete = () => {
-		if (!accountIsOnline) {
+		if (!online) {
 			handleAlert({open: true})
 			return false
 		}
@@ -387,8 +385,8 @@ function GroupMessagesPane ({
       	/>
       	{participants.some(i => i.username === username) ?
       		<MessageInput 
+      			inputValue={inputValue}
       			handleTextInput={handleTextInput}
-      			value={inputValue}
       			sendMessage={sendMessage}
       		/>
       	: 

@@ -17,28 +17,24 @@ const {
 	fetchGroupChats,
 } = require('../controllers/groups')
 
-const {
-	confirmAccess
-} = require('../controllers/auth')
+const { requireAuth } = require('../helpers/auth-helpers')
 
 const chatRoute = express.Router()
+chatRoute.all( '*', requireAuth)
 
-chatRoute.get('/fetchMessages/:userId/:friendsName', fetchMessages)
-chatRoute.get('/fetchGroupInfo/:userId/:groupId', fetchGroupInfo)
-chatRoute.get('/recentChats/:userId', fetchRecentChats)
-chatRoute.put('/starConversation/:userId/:username', starConversation)
-chatRoute.put('/saveUnread/:userId/:sender/:chatId', saveUnreadChat)
-chatRoute.delete('/clearConversation/:userId/:username', clearConversation)
+chatRoute.get('/fetchMessages/:username', fetchMessages)
+chatRoute.get('/fetchGroupInfo/:groupId', fetchGroupInfo)
+chatRoute.get('/recentChats', fetchRecentChats)
+chatRoute.put('/starConversation/:username', starConversation)
+chatRoute.put('/saveUnread/:sender/:chatId', saveUnreadChat)
+chatRoute.delete('/clearConversation/:username', clearConversation)
 
-chatRoute.get('/fetchGroupChats/:userId/:groupId', fetchGroupChats)
+chatRoute.get('/fetchGroupChats/:groupId', fetchGroupChats)
 
-chatRoute.put('/starGroup/:userId/:groupId', starGroup)
-chatRoute.put('/setGroupUnread/:userId/:groupId/:chatId', setGroupUnread)
+chatRoute.put('/starGroup/:groupId', starGroup)
+chatRoute.put('/setGroupUnread', setGroupUnread)
+chatRoute.put('/clearGroupUnread', clearGroupUnread)
 
-chatRoute.delete('/clearGroupUnread/:userId/:groupId', clearGroupUnread)
-
-chatRoute.delete('/deleteGroup/:userId/:groupId', deleteGroup)
-
-// chatRoute.param('userId', confirmAccess)
+chatRoute.delete('/deleteGroup/:groupId', deleteGroup)
 
 module.exports = chatRoute
