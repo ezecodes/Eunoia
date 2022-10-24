@@ -17,7 +17,7 @@ const useStyles = makeStyles({
 function HelperAlert () {
 	const classes = useStyles()
 	const dispatch = useDispatch()
-	const closeError = () => dispatch(handleAlert({open: false}))
+	const closeAlertSnackbar = () => dispatch(handleAlert({open: false}))
 	const {open, msg, severity} = useSelector(state => state.other.alert)
 	return (
 	 <Snackbar 
@@ -27,10 +27,10 @@ function HelperAlert () {
 				horizontal: 'center',
 			}}
     	className={classes.root}
-			onClose={closeError}
+			onClose={closeAlertSnackbar}
 			autoHideDuration={8000}
 		>
-		  <MuiAlert variant='filled' elevation={6} onClose={closeError} severity={severity}>
+		  <MuiAlert variant='filled' elevation={6} onClose={closeAlertSnackbar} severity={severity}>
 		    {msg}
 		  </MuiAlert>
 		</Snackbar>

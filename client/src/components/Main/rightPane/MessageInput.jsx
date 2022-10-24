@@ -22,7 +22,7 @@ function MessageInput({inputValue, sendMessage = () => {}, handleTextInput = () 
   		maxRows={4}
   		value={inputValue}
   		onKeyDown={listenForEnter}
-  		minRows={1}
+  		minRows={0}
   		endAdornment={
 				<InputAdornment position="end" style={{height: '100%'}}>
 					<IconButton onClick={sendMessage} >

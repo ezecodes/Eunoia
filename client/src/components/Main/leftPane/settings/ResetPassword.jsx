@@ -22,11 +22,12 @@ import { Preloader, ThreeDots } from 'react-preloader-icon'
 import {CSSTransition } from 'react-transition-group'
 
 import { setComponents } from '../../../../Redux/features/componentSlice'
+import { handleAlert } from '../../../../Redux/features/otherSlice'
 import { useDispatch, useSelector } from 'react-redux'
 
 import Header from '../../Header'
 import NetworkProgress from '../../NetworkProgress'
-import { matchPassword, resetPassword } from '../../../../api/account'
+import { matchPassword, resetPassword } from './api-helper'
 
 const useStyles = makeStyles({
 	body: {
@@ -70,8 +71,8 @@ const ResetPassword = ({className}) => {
 	const {id} = useSelector(state => state.account.account)
 	const dispatch = useDispatch()
 	const classes = useStyles()
-	const [open, setOpen] = React.useState(false)
-	const [passwordUpdate, setUpdate] = React.useState(false)
+	const [passwordUpdateStatus, setPasswordUpdateStatus] = React.useState({severity: '', msg: '', show: false})
+	const [requestIsProcessing, setReqIsProcessing] = React.useState(false)
 
 	const [showPassword, handlePV] = React.useState({
 		former: false, newPassword: false, confirmPassword: false
@@ -87,47 +88,51 @@ const ResetPassword = ({className}) => {
 		former: '', newPassword: '', confirmPassword: ''
 	})
 	const handleClose = () => {
-		setOpen(false)
+		setPasswordUpdateStatus({show: false})
 	}
-	const updatePassword  = async (obj) => {
-		setUpdate(true)
-		setInputs({...values, former: '', newPassword: '', confirmPassword: ''})
-		resetPassword(obj, res => {
-			setUpdate(false)
-			setOpen(true)
+	const updatePassword  = async () => {
+		setReqIsProcessing(true)
+		resetPassword(values, res => {
+			setInputs({...values, former: '', newPassword: '', confirmPassword: ''})
+			setReqIsProcessing(false)
+			closeResetPasswordPage()
+			if (res.status === 200) {
+				dispatch(handleAlert({open: true, msg: 'Password updated successfully', severity: 'success'}))
+			} else {
+				dispatch(handleAlert({open: true, msg: 'Something went wrong', severity: 'error'}))
+			}
+			
 		})
 	}
 	const _matchPassword = async (e) => {
 		e.preventDefault()
-		setUpdate(true)
+		setReqIsProcessing(true)
 		const {former, newPassword, confirmPassword} = values
-		matchPassword({former}, res => {
-			setUpdate(false) 
-			if (res.error) {
-				let keys = Object.keys(res.error)
-				let errorObj = {}
-				keys.map(i => errorObj[i] = true)
-				setError({...error, ...errorObj})
-				setHelp({...help, ...res.error})
+		matchPassword({former}, async res => {
+			setReqIsProcessing(false) 
+			if (res.status === 403) {
+				setError({...error, former: true})
+				setHelp({...help, former: 'Passwords do not match'})
 				return
 			}
+
 			if (newPassword !== confirmPassword) {
 				setError({...error, confirmPassword: true, newPassword: true})
 				setHelp({...help, confirmPassword: 'Passwords do not match'})
 				return
 			}
-			if (newPassword.length <= 4) {
+			if (newPassword.length < 5) {
 				setError({...error, confirmPassword: true, newPassword: true})
 				setHelp({...help, confirmPassword: 'Password is too short. Password length should be more than 5 characters'})
 				return
 			}
-			updatePassword(values)
+			updatePassword()
 		})
 
 	}
 	
-	const setComp = (obj) => {
-		dispatch(setComponents(obj))
+	const closeResetPasswordPage = () => {
+		dispatch(setComponents({component: 'settings', parent: 'stack'}))
 	}
 
 	const setValue = (input, ele) => {
@@ -144,13 +149,14 @@ const ResetPassword = ({className}) => {
 	}
  
 	return (
+		<>
 			<section className={[classes.resetPassword, className].join(' ')} >
 		  	<Header>
-					<IconButton onClick={() => setComp({component: 'settings', parent: 'stack'})}>
+					<IconButton onClick={closeResetPasswordPage}>
 						<KeyboardBackspaceIcon />
 					</IconButton>
 					<Typography component='h6' > Reset Password </Typography>
-					{ passwordUpdate &&
+					{ requestIsProcessing &&
 						<NetworkProgress />
 					}
 				</Header>
@@ -183,7 +189,8 @@ const ResetPassword = ({className}) => {
 							className={classes.input}
 							onChange={e => setValue(e.target.value, 'newPassword')} 
 							value={values.newPassword} 
-							placeholder='New password' type='password'
+							placeholder='New password' 
+							type='password'
 							required
 							autoComplete='new-password'
 							error={error.newPassword}
@@ -203,7 +210,8 @@ const ResetPassword = ({className}) => {
 						<TextField variant='outlined' 
 							className={classes.input} 
 							onChange={e => setValue(e.target.value, 'confirmPassword')} value={values.confirmPassword} 
-							placeholder='ConfirmPassword password' type='password'
+							placeholder='Confirm password' 
+							type='password'
 							required
 							autoComplete='new-password'
 							error={error.confirmPassword}
@@ -224,16 +232,14 @@ const ResetPassword = ({className}) => {
 						<ButtonGroup>
 							<Button 
 								variant='contained' 
-								disabled={passwordUpdate}
+								disabled={requestIsProcessing}
 								type='submit'
 								color='primary'
 							> 
 								Update password
 							</Button>
 							<Button 
-								onClick={() => {
-									setComp({component: 'settings', value: true})
-								}}
+								onClick={closeResetPasswordPage}
 								color='primary'
 								variant='contained' 
 								type='button'
@@ -243,13 +249,9 @@ const ResetPassword = ({className}) => {
 						</ButtonGroup>
 					</form>
 				</div>
-				<Snackbar open={open} 
-					autoHideDuration={6000} onClose={handleClose}>
-				  <MuiAlert variant='filled' elevation={6} onClose={handleClose} severity="success">
-				    Password changed successfully
-				  </MuiAlert>
-				</Snackbar>
+				
 			</section>
+		</>
 	)
 }
 

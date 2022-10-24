@@ -18,7 +18,7 @@ const { requireAuth } = require('../helpers/auth-helpers')
 accountRoute.all('*', requireAuth)
 
 accountRoute.put('/updateSocials', updateSocials)
-accountRoute.put('/matchPassword', matchPassword)
+accountRoute.post('/matchPassword', matchPassword)
 accountRoute.put('/updatePassword', updatePassword)
 accountRoute.put('/setNotify', setNotify)
 accountRoute.put('/saveProfileInfo', saveProfileInfo)

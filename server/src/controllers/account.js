@@ -1,5 +1,6 @@
 const bcrypt = require('bcrypt')
 const User = require('../models/User.js')
+const hashValue = 10
 
 async function setNotify(req, res) {
 	const {userId} = req
@@ -57,7 +58,7 @@ async function matchPassword(request, response) {
  			if (compare) {
  				response.sendStatus(200)
  			} else {
- 				response.send({error: {former: 'Passwords do not match'}})
+ 				response.sendStatus(403)
  			}
  		} catch (e) {
  			e && console.log(e)
@@ -68,20 +69,28 @@ async function matchPassword(request, response) {
 async function updatePassword(request, response) {
 	const { userId} = request
 	const { newPassword, confirmPassword, former } = request.body
-	const hashedPassword = await bcrypt.hash(newPassword, 10)
-	const user = await User.findByIdAndUpdate(userId, {password: hashedPassword})
-	if (user) response.sendStatus(200)
+ 	const user = await User.findById(userId)
+
+	const compare = await bcrypt.compare(former, user.password)
+	if (!compare) {
+		return response.sendStatus(404)
+	}
+	const hashedPassword = await bcrypt.hash(newPassword, hashValue)
+	const savePassword = await User.findByIdAndUpdate(userId, {password: hashedPassword})
+	if (savePassword) response.sendStatus(200)
 }
 
 async function deleteSocial(request, response) {
 	const {userId} = request
 	const social = request.body
 
-	await User.findByIdAndUpdate(userId, 
+	const deleteAction = await User.findByIdAndUpdate(userId, 
 		{
 			$pull: {socials: {name: social.name}}
 		}
 	)
+
+	if (deleteAction) response.sendStatus(200)
 }
 
 async function updateSocials(request, response) {
@@ -105,7 +114,7 @@ async function updateSocials(request, response) {
 			{arrayFilters: [{'social.name': social.name}]},
 		)
 	}
-	// response.send(update.socials)
+	response.sendStatus(200)
 }
 
 async function getAccount(request, response) {
@@ -121,9 +130,9 @@ async function getAccount(request, response) {
 		createdGroups: 1
 	})
 	if (user) response.send(user)
-		else {
-			response.status(404).send()
-		}
+	else {
+		response.sendStatus(404)
+	}
 }
 
 module.exports = {

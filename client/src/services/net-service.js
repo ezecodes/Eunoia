@@ -28,7 +28,7 @@ export async function net_service(req_obj, cb = () => {}) {
 		try {
 			let response = await fetch(
 			 	url,
-			 	{method , headers}
+			 	{method, headers}
 			)
 			if (response.ok) cb(await response.json())
 			else {

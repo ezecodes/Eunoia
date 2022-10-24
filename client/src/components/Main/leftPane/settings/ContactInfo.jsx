@@ -48,11 +48,12 @@ import {CSSTransition } from 'react-transition-group'
 import { makeStyles } from '@material-ui/core/styles'
 
 import { setComponents } from '../../../../Redux/features/componentSlice'
+import { handleAlert } from '../../../../Redux/features/otherSlice'
 import { setNewSocial, handleDeleteSocial } from '../../../../Redux/features/accountSlice'
 
 import Header from '../../Header'
 import NetworkProgress from '../../NetworkProgress'
-import { updateSocials, deleteSocial } from '../../../../api/account'
+import { updateSocials, deleteSocial } from './api-helper'
 
 const useStyles = makeStyles({
 	contactInfo: {
@@ -141,12 +142,9 @@ const ContactInfo = ({className}) => {
 	const [showDial, setDial] = React.useState(false)
 	const {username, socials, online} = useSelector(state => state.account.account)
 	const [showProgress, setProgress] = React.useState(false)
-	const [open, setOpen] = React.useState(false);
+	const [showSpeedDial, setSpeedDial] = React.useState(false);
 	const [expand, setExpand] = React.useState(false)
-	const [openAlert, setAlert] = React.useState({
-		show: false, message: ''
-	})
-
+	
 	const [error, setError] = React.useState({
 		error: false, helperText: ''
 	})
@@ -173,18 +171,9 @@ const ContactInfo = ({className}) => {
 	}
 
 	
-	const setComp = (obj) => {
-		dispatch(setComponents(obj))
+	const closeContactInfoPage = (obj) => {
+		dispatch(setComponents({component: 'settings', parent: 'stack'}))
 	}
-
-	const handleOpen = () => {
-    setOpen(true);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-  };
-
   const showCollapse = () => {
   	setExpand(!expand)
   }
@@ -207,38 +196,58 @@ const ContactInfo = ({className}) => {
 		})
 		if (error.error) setError({error: false, helperText: ''})
 	}
+	
+	const handleClose = () => {
+    setOpen(false);
+  };
 
   const updateSocial = () => {
   	const value = validateInput(newSocial.social.link)
-
   	setError({...value})
 
-  	if (!value.error && online) {
-  		updateSocials(newSocial.social, () => {})
-  		dispatch(setNewSocial(newSocial.social))
+  	if (!online) {
+  		dispatch(handleAlert({open: true}))
+  		return
+  	}
+
+  	if (!value.error) {
+  		updateSocials(newSocial.social, res => {
+  			res.ok && dispatch(setNewSocial(newSocial.social))
+  		})
+  		
   	}
   }
 
   const changePrivacy = (social) => {
-  	updateSocials(social, () => {})
-  	dispatch(setNewSocial(social))
-  	setAlert({show: true, message: 'Privacy updated'})
+  	updateSocials(social, res => {
+  		if (res.ok) {
+  			dispatch(setNewSocial(social))
+  			dispatch(handleAlert({open: true, msg: 'Privacy updated', severity: 'success'}))
+  		} else {
+  			dispatch(handleAlert({open: true, msg: 'Something went wrong', 'severity': 'error'}))
+  		}
+  	})
+  	
   }
 
   const _deleteSocial = (social) => {
-  	deleteSocial(social, () => {})
-  	dispatch(handleDeleteSocial(social))
-  	setAlert({show: true, message: 'Contact deleted successfully'})
-  }
-  const closeAlert = () => {
-  	setAlert({show: false, message: ''})
+  	deleteSocial(social, res => {
+  		if (res.ok) {
+  			dispatch(handleDeleteSocial(social))
+  			dispatch(handleAlert({open: true, msg: 'Contact successfully deleted', severity: 'success'}))
+  		} else {
+  			dispatch(handleAlert({open: true, msg: 'Something went wrong', 'severity': 'error'}))
+  		}
+  	})
+  	
+  	
   }
 
 	return (
 			<section className={[classes.contactInfo, className].join(' ')} >
 				
 				<Header>
-					<IconButton onClick={() => setComp({component: 'settings', parent: 'stack'})}>
+					<IconButton onClick={closeContactInfoPage}>
 						<KeyboardBackspaceIcon />
 					</IconButton>
 					<Typography component='h6'> Contact info </Typography>
@@ -350,29 +359,13 @@ const ContactInfo = ({className}) => {
 
 					</List>
 
-					<Snackbar 
-						className={classes.bottomSnackbar}
-						anchorOrigin={{
-							vertical: 'bottom',
-							horizontal: 'center',
-						}}
-						autoHideDuration={2000} 
-						message={openAlert.message}
-						open={openAlert.show}
-						onClose={closeAlert}
-					>
-					<MuiAlert variant='filled' elevation={6} onClose={closeAlert} severity="success">
-				    {openAlert.message}
-				  </MuiAlert>
-				</Snackbar>
-
 					<SpeedDial
 		        ariaLabel="SpeedDial openIcon"
 		        className={classes.speedDial}
 		        icon={<SpeedDialIcon openIcon={<EditIcon />} />}
-		        onClose={handleClose}
-		        onOpen={handleOpen}
-		        open={open}
+		        onClose={() => setSpeedDial(false)}
+		        onOpen={() => setSpeedDial(true)}
+		        open={showSpeedDial}
 		      >
 		        {actions.map((action, i) => (
 		          <SpeedDialAction
@@ -382,7 +375,7 @@ const ContactInfo = ({className}) => {
 		            icon={action.icon}
 		            tooltipTitle={action.name}
 		            onClick={() => {
-		            	handleClose()
+		            	setSpeedDial(false)
 		            	addSocial(action)
 		            }}
 		          />
