@@ -3,10 +3,6 @@ const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
 const chatSchema = Schema({
-	_id: {
-		any: Schema.Types.Mixed,
-		immutable: false
-	},
 	username: String,
 	groups: [
 		{	
