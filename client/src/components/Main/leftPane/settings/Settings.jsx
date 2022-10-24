@@ -243,6 +243,7 @@ const Settings = ({className}) => {
 	const callToLogout = () => {
 		logout(res => {
 			clearAuth()
+			document.location = '/'
 		})
 	}
 

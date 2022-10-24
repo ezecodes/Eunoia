@@ -176,21 +176,21 @@ const Main = ({user}) => {
 				username: chat.sender,
 				lastChat: chat.message,
 			}))
+
+			if (!assert(selectedUser) || selectedUser.username !== chat.sender) {
+				saveUnreadChat({sender: chat.sender, chatId: chat.message.chatId})
+				dispatch(setUnread({friendsName: chat.sender, chatId: chat.message.chatId}))
+			}
 		}
 
 		if (activeUsers.find(i => i.username === chat.sender)) {
 			handleDispatch()
 		} else {
 			getActiveUsers(res => {
-				storeActiveUsers(res)
+				dispatch(storeActiveUsers(res))
 				socket.emit('getOnileUsers')
 				handleDispatch()
 			})
-		}
-
-		if (!assert(selectedUser) || selectedUser.username !== chat.sender) {
-			saveUnreadChat({sender: chat.sender, chatId: chat.message.chatId})
-			dispatch(setUnread({friendsName: chat.sender, chatId: chat.message.chatId}))
 		}
 
 		if (assert(selectedUser) && selectedUser.username === chat.sender) {
@@ -199,6 +199,7 @@ const Main = ({user}) => {
 				receiver: username,
 			})
 		}
+
 	})
 
 	socket.off('chatHasBeenRead').on('chatHasBeenRead', ({sender, receiver}) => {

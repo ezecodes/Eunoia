@@ -1,4 +1,4 @@
-export const signIn = async (user) => {
+export const signIn = async (user, cb) => {
 	try {
 		let response = await fetch('/auth/login', {
 			method: 'POST',
@@ -8,7 +8,7 @@ export const signIn = async (user) => {
 			},
 			body: JSON.stringify(user)
 		})
-		return await response.json()
+		cb(response)
 	} catch(err) {
 		console.log(err)
 	}

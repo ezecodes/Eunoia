@@ -78,16 +78,19 @@ const Form = ({login}) => {
 			persisLogin: checked
 		}
 
-		signIn(req_obj).then(res => {
+		signIn(req_obj, async res => {
 			handleButtonState(false)
-			if (res.error) {
-				errMsg(res.error)
-			} else {
-				storeCredentials(res, () => {
+			const jsonResponse = await res.json()
+			if (res.status === 401) {
+				errMsg(jsonResponse.error)
+			} else if (res.status === 200) {
+				storeCredentials(jsonResponse, () => {
 					successMsg('Log in successful ✌')
 					handleButtonState(false)
 					document.location = '/'
 				})
+			} else {
+				errMsg('Something went wrong')
 			}
 		})
 	}
