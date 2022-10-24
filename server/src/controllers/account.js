@@ -100,7 +100,7 @@ async function updateSocials(request, response) {
 	const saved = await User.findOne({_id: userId}, {_id:0, socials: 1})
 	const index = saved.socials.findIndex(i => i.name === social.name)
 	// const saved
-	let update
+	let update 
 
 	if (index === -1) {
 		 update = await User.findOneAndUpdate(

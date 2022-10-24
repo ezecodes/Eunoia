@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "nodemon index.js",
     "client": "cd ../client && npm start",
-    "start": "concurrently \"npm run dev\" \"npm run client \" "
+    "localMode": "concurrently \"npm run dev\" \"npm run client \" ",
+    "start": "node index.js"
   },
   "nodemonConfig": {
     "watch": [
