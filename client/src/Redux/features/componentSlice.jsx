@@ -16,6 +16,9 @@ const initialState = {
 		resetPassword: false,
 		contactInfo: false,
 		newGroup: false
+	},
+	app: {
+		display: false
 	}
 		
 }
@@ -36,6 +39,9 @@ const componentSlice = createSlice({
 	name: 'components',
 	initialState,
 	reducers: {
+		displayApp: (state, action) => {
+			state.app.display = action.payload
+		},
 		setComponents: (state, action) => {
 			const {parent, component, value} = action.payload
 
@@ -46,13 +52,13 @@ const componentSlice = createSlice({
 			} else {
 				state[`${parent}`] = component
 			}
-
 		},
 	}
 })
 
 export const {
-	setComponents
+	setComponents,
+	displayApp
 } = componentSlice.actions
 
 export default componentSlice.reducer

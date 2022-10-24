@@ -140,7 +140,6 @@ const ContactInfo = ({className}) => {
 	const classes = useStyles()
 	const [showDial, setDial] = React.useState(false)
 	const {username, socials, online} = useSelector(state => state.account.account)
-	const showLoader = useSelector(state => state.account.account.showLoader)
 	const [showProgress, setProgress] = React.useState(false)
 	const [open, setOpen] = React.useState(false);
 	const [expand, setExpand] = React.useState(false)
@@ -248,9 +247,6 @@ const ContactInfo = ({className}) => {
 					}
 				</Header>
 
-				{showLoader ? 
-					<> </>
-				:
 				<div className={classes.contactBody}>
 					<List className={classes.list} >
 						<ListItem button>
@@ -392,7 +388,7 @@ const ContactInfo = ({className}) => {
 		          />
 		        ))}
 		      </SpeedDial>
-				</div>}
+				</div>
 			</section>
 	)
 }

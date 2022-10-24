@@ -3,14 +3,12 @@ const Chat = require('../models/Chat.js')
 async function starGroup(request) {
 	const { userId } = request
 	const { groupId } = request.params
-	const {starredObj} = request.body
 	await Chat.findOneAndUpdate({_id: userId, 'groups._id': groupId}, {
-		'groups.$.isStarred': starredObj
+		'groups.$.isStarred': request.body
 	})
 }
 
 async function fetchGroupInfo(request, response) {
-	//TODO: validate the token
 	const { userId } = request
 	const {groupId} = request.params
 	
@@ -26,7 +24,7 @@ async function fetchGroupInfo(request, response) {
 
 async function saveUnreadChat(request) {
 	const { userId } = request
-	const { sender, chatId} = request.params
+	const { sender, chatId} = request.body
 	await Chat.findOneAndUpdate({_id: userId, 'chats.username': sender}, {
 		$push: {
 			'chats.$.unread': chatId
@@ -36,7 +34,7 @@ async function saveUnreadChat(request) {
 
 async function deleteGroup(request) {
 	const { userId } = request
-	const {groupId} = request.params
+	const {groupId} = request.body
 	await Chat.findByIdAndUpdate(userId, {
 		$pull: {
 			groups: {_id: groupId}
@@ -66,7 +64,7 @@ async function clearGroupUnread(req) {
 
 async function starConversation(request) {
 	const {userId} = request
-	const { username } = request.params
+	const { username } = request.body
 
 	const {starred} = request.body
 
@@ -77,7 +75,7 @@ async function starConversation(request) {
 
 async function clearConversation(request) {
 	const { userId } = request
-	const {username} = request.params
+	const {username} = request.body
 
 	await Chat.findByIdAndUpdate(userId, {
 		$pull: {
@@ -96,15 +94,16 @@ async function fetchMessages(request, response) {
 				'chats.$': 1
 			}
 		)
-		console.log(chats)
 		
 		if (chats !== null) {
-			response.send({
+			response.status(200).send({
 				username: chats.chats[0].username,
 				messages: chats.chats[0].messages
 			})
 		} else {
-			response.status(404).send()
+			response.status(200).send({
+				username, messages: []
+			})
 		}
 	} catch(e) {
 		e && console.log('Err' + e)

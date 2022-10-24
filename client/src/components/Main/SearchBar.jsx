@@ -5,10 +5,10 @@ import InputBase from '@material-ui/core/InputBase'
 
 const useStyles = makeStyles({
 	searchbar: {
-		width: '100%',
-		border: '1px solid #cdd3dd',
+		width: '80%',
+		borderBottom: '1px solid #e3e3e3',
 		padding: '5px 15px',
-		borderRadius: '100px',
+		// borderRadius: '100px',
 		margin: '0 9px',
 		'& .MuiInputBase-input': {
 			fontSize: '.9rem',

@@ -17,6 +17,7 @@ import ListItemText from '@material-ui/core/ListItemText'
 import ListItem from '@material-ui/core/ListItem'
 import List from '@material-ui/core/List'
 import ListItemIcon from '@material-ui/core/ListItemIcon';
+import { Link } from "react-router-dom";
 
 import UserAvatar from '../UserAvatar'	
 import ChatActions from '../ChatActions'
@@ -133,6 +134,7 @@ function UserList({
 	chatType,
 	isOnline,
 	typing,
+	pId,
 	groupIsSelected,
 	isFetched,
 	isCurrentSelectedUser
@@ -211,8 +213,7 @@ function UserList({
 	}
 	
 	return (
-		<>
-		<ListItem
+		<><ListItem
 			button
 			className={classes.listItem}
 			selected={isCurrentSelectedUser || showMenu}
@@ -300,8 +301,7 @@ function UserList({
    			</IconButton>
    		</div>
 
-   	</ChatActions>
-   	</>
+   	</ChatActions></>
 	)
 }
 

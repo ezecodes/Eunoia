@@ -6,12 +6,14 @@ import common from '@material-ui/core/colors/common';
 import Snackbar from '@material-ui/core/Snackbar'
 import MuiAlert from '@material-ui/lab/Alert';
 
-import ActiveUsers from './ActiveUsers'
-import RecentChats from './RecentChats'
-import NewGroup from './NewGroup'
-import Settings from './settings/Settings'
-import ResetPassword from './settings/ResetPassword'
-import ContactInfo from './settings/ContactInfo'
+const ActiveUsers = React.lazy(() => import('./ActiveUsers'))
+const RecentChats = React.lazy(() => import('./RecentChats'))
+const NewGroup = React.lazy(() => import('./NewGroup'))
+const Settings = React.lazy(() => import('./settings/Settings'))
+const ResetPassword = React.lazy(() => import('./settings/ResetPassword'))
+const ContactInfo = React.lazy(() => import('./settings/ContactInfo'))
+
+import ComponentLoader from '../../ComponentLoader'
 
 import DragIndicatorIcon from '@material-ui/icons/DragIndicator';
 import IconButton from '@material-ui/core/IconButton'
@@ -81,36 +83,20 @@ const LeftPane = () => {
 	const DEFAULT_WIDTH = 330
 	const [width, setWidth] = React.useState(DEFAULT_WIDTH)
 	
-	// const ele = React.createRef(null)
-
-	// const beginDrag = e => {
-	// 	console.log('start')
-	// 	e.target.addEventListener('mousemove', startResize)
-	// 	e.target.addEventListener('mouseup', stopResize)
-	// 	e.target.addEventListener('mouseout', stopResize)
-	// }
-	// const stopResize = () => {
-	// 	console.log('stop')
-	// 	window.removeEventListener('mousemove', startResize)
-	// 	window.removeEventListener('mousedown', beginDrag)
-	// }
-
-	// React.useEffect(() => {
-	// 	// console.log(width)
-	// }, [width])
-
 	const startResize = evt => {
 		setWidth( width + evt.movementX )
 	}
 	return (
 		<Root width={width} minWidth={DEFAULT_WIDTH} >
 			<div className='wrap'>
-				{activeUsers && <ActiveUsers className={classNames}/>}
-				{recentChats && <RecentChats className={classNames} />}
-				{newGroup && <NewGroup className={classNames} />}
-				{settings && <Settings className={classNames} />}
-				{contactInfo && <ContactInfo className={classNames}/>}
-				{resetPassword && <ResetPassword className={classNames}/>}
+				<React.Suspense fallback={<ComponentLoader />}>
+					{activeUsers && <ActiveUsers className={classNames}/>}
+					{recentChats && <RecentChats className={classNames} />}
+					{newGroup && <NewGroup className={classNames} />}
+					{settings && <Settings className={classNames} />}
+					{contactInfo && <ContactInfo className={classNames}/>}
+					{resetPassword && <ResetPassword className={classNames}/>}
+				</React.Suspense>
 			</div>
 			{/*<div className='resize' onMouseDown={beginDrag} >
 				<DragIndicatorIcon />

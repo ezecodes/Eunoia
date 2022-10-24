@@ -97,10 +97,12 @@ const ResetPassword = ({className}) => {
 			setOpen(true)
 		})
 	}
-	const _matchPassword = async (val) => {
+	const _matchPassword = async (e) => {
+		e.preventDefault()
 		setUpdate(true)
 		const {former, newPassword, confirmPassword} = values
 		matchPassword({former}, res => {
+			setUpdate(false) 
 			if (res.error) {
 				let keys = Object.keys(res.error)
 				let errorObj = {}

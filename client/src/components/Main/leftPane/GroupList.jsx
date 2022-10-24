@@ -26,15 +26,15 @@ import { setSelectedGroup, storeGroupChats, setFetchedGroup, fetchChatsFromLS } 
 import { setSelectedUser } from '../../../Redux/features/otherSlice'
 import { 
 	resetUnread, 
-	starGroup, 
+	starGroup as _starGroup, 
 	handleGroupUnread,
 	alertGroupDeletion,
 	updateGroupField
 } from '../../../Redux/features/recentChatsSlice'
 
-import { assert, getDateValue, handleFetch} from '../../../lib/script'
+import { assert, getDateValue} from '../../../lib/script'
 import emit from '../../../sockets/outgoing'
-import { fetchGroupChats } from '../../../api/group-chat'
+import { fetchGroupChats, clearGroupUnread, starGroup } from '../../../api/group-chat'
 
 const useStyles = makeStyles({
 	listItem: {
@@ -158,13 +158,8 @@ function GroupList ({
 	const handleStar = () => {
 		const starredObj = {value: !isStarred.value, date: Date.now()}
 
-		handleFetch(
-			`chat/starGroup/${id}/${_id}`,
-			'put',
-			{starredObj}
-		)
-
-		dispatch(starGroup({_id, starredObj }))
+		starGroup({groupId: _id, body: starredObj})
+		dispatch(_starGroup({_id, starredObj }))
 	}
 	
 	const setPane = () => {
@@ -199,7 +194,7 @@ function GroupList ({
 			handleDispatch()
 		} else {
 			fetchGroupChats({groupId: _id}, res => {
-				storeGroupChats(res)
+				dispatch(storeGroupChats(res))
 				dispatch(setFetchedGroup(_id))
 				handleDispatch()
 			})

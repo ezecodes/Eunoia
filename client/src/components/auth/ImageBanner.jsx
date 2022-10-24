@@ -13,7 +13,7 @@ const useStyles = makeStyles({
 		width: '40%',
 		display: 'flex',
 		flexDirection: 'column',
-		justifyContent: 'center',
+		justifyContent: 'flex-start',
 		position: 'relative',
 		['@media (max-width: 924px)']: {
 			display: 'none'

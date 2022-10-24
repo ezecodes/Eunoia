@@ -26,6 +26,8 @@ import FormLabel from '@material-ui/core/FormLabel';
 
 import KeyboardBackspaceIcon from '@material-ui/icons/KeyboardBackspace';
 import CheckIcon from '@material-ui/icons/Check'
+import { CSSTransition } from 'react-transition-group';
+import styles from '../../../stylesheet/transition.css'
 
 import Header from '../Header'
 import Loader from './Loader'
@@ -81,7 +83,7 @@ const useStyles = makeStyles({
 		width: '100%'
 	},
 })
-function GroupSettings({_id, name, description, settings, isAdmin}) {
+function GroupSettings({_id, name, description, settings, isAdmin, show}) {
 	const dispatch = useDispatch()
 	const classes = useStyles()
 	const {id, username, online} = useSelector(state => state.account.account)
@@ -89,9 +91,10 @@ function GroupSettings({_id, name, description, settings, isAdmin}) {
 	const nameRef = React.createRef(null)
 	const descRef = React.createRef(null)
 	const [loading, setLoader] = React.useState(false)
+	const nodeRef = React.useRef(null)
 
 	const closeComp = () => {
-		dispatch(setComponents({component: 'gRoot', parent: 'gInfos'}))
+		dispatch(setComponents({component: 'gRoot', parent: 'gInfos', value: false}))
 	}
 	const closeAlert = () => {
 		setOpen(false)
@@ -185,8 +188,19 @@ function GroupSettings({_id, name, description, settings, isAdmin}) {
 
 	return (
 		<>
-		<Slide in={true} direction='left'>
-		<div className={classes.groupInfo}>
+		<CSSTransition
+	    in={show}
+	    nodeRef={nodeRef}
+	    timeout={500}
+	    classNames={{
+	    	enter: styles.animate__animated,
+				enterActive: styles.animate__fadeInRight,
+				exit: styles.animate__animated,
+				exitActive: styles.animate__fadeOutRight
+	    }}
+	    unmountOnExit
+	  >
+		<div className={classes.groupInfo} ref={nodeRef}>
 		<Header>
 			<IconButton onClick={closeComp}>
 				<KeyboardBackspaceIcon />
@@ -245,7 +259,7 @@ function GroupSettings({_id, name, description, settings, isAdmin}) {
     	}
 		</div>
 		</div>
-		</Slide>
+		</CSSTransition>
 		</>
 	)
 }

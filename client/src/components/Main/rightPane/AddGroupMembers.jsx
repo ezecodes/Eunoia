@@ -23,6 +23,9 @@ import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import DoneIcon from '@material-ui/icons/Done';
 
 import { makeStyles } from '@material-ui/core/styles';
+import { CSSTransition } from 'react-transition-group';
+
+import styles from '../../../stylesheet/transition.css'
 
 import { setComponents} from '../../../Redux/features/componentSlice'
 import { handleAlert } from '../../../Redux/features/otherSlice'
@@ -144,7 +147,7 @@ const UserList = ({user, isSelected, setSelected, searchTerm}) => {
 	)
 }
 
-const AddGroupMembers = ({activeUsers, participants, _id}) => {
+const AddGroupMembers = ({activeUsers, participants, _id, show}) => {
 	// TODO: ADD group rules on dialog
 	const {id, username, online} = useSelector(state => state.account.account)
 	const classes = useStyles()
@@ -154,9 +157,10 @@ const AddGroupMembers = ({activeUsers, participants, _id}) => {
 	const group = useSelector(state => state.groups.selectedGroup)
 	const [searchTerm, setSearch] = React.useState('')
 	const [loading, setLoader] = React.useState(false)
+	const nodeRef = React.useRef(null)
 
 	const closeComp = () => {
-		dispatch(setComponents({component: 'gRoot', parent: 'gInfos'}))
+		dispatch(setComponents({component: 'gRoot', parent: 'gInfos', value: false}))
 	}
 	function loaded(msg) {
 		setLoader(false)
@@ -202,8 +206,19 @@ const AddGroupMembers = ({activeUsers, participants, _id}) => {
 	
 	}
 	return (
-		<Slide in={true} direction='left'>
-		<div className={[classes.groupUsers].join(' ')}>
+		<CSSTransition
+	    in={show}
+	    nodeRef={nodeRef}
+	    timeout={500}
+	    classNames={{
+	    	enter: styles.animate__animated,
+				enterActive: styles.animate__fadeInRight,
+				exit: styles.animate__animated,
+				exitActive: styles.animate__fadeOutRight
+	    }}
+	    unmountOnExit
+	  >
+		<div className={[classes.groupUsers].join(' ')} ref={nodeRef}>
 			<Header>
 				<IconButton onClick={closeComp} >
 					<KeyboardBackspaceIcon />
@@ -272,7 +287,7 @@ const AddGroupMembers = ({activeUsers, participants, _id}) => {
       </IconButton>
 
 		</div>
-		</Slide>
+		</CSSTransition>
 	)
 }
 

@@ -5,13 +5,15 @@ import styled from 'styled-components'
 import ImageBanner from './ImageBanner'
 import FavoriteIcon from '@material-ui/icons/Favorite';
 import { useWinHeight } from '../../hooks/hooks'
+import styles from '../../stylesheet/transition.css'
+import { Email, GitHub, LinkedIn } from '@material-ui/icons'
+import { CSSTransition } from 'react-transition-group'
 
 const Root = styled.section.attrs(props => ({
 
 })) `
 	overflow-y: scroll;
 	display: flex;
-	height: ${props => props.height};
 	flex-direction: column;
 	justify-content: space-around;
 	background: linear-gradient(45deg, #f4f6ff, #ffe8e859);
@@ -20,10 +22,9 @@ const Root = styled.section.attrs(props => ({
 		display: flex;
 		justify-content: space-around;
 		height: 100%;
-		padding: 5rem 0;
+		padding: 2rem 0;
 
 		@media (max-width: 1130px) {
-			padding: 2rem 0;
 		}
 	}
 
@@ -56,11 +57,39 @@ const Root = styled.section.attrs(props => ({
 	& footer {
 		bottom: 0;
 		display: flex;
+		margin-top: 10px;
+		flex-direction: column;
+		align-items: center;
 		justify-content: center;
+
+		.contact {
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			align-items: center;
+
+			.contacts {
+				a {
+					margin-right: 4px;
+				}
+				svg {
+					font-size: 20px;
+					transition: .4s ease all;
+				}
+				svg:hover {
+					font-size: 27px;
+				}
+			}
+		}
 
 		& > span {
 			display: flex;
 			align-items: center;
+		}
+		.subText {
+			margin: 6px 0 5px;
+			font-size: 14px;
+			color: #787878;
 		}
 
 		.MuiSvgIcon-root {
@@ -118,8 +147,39 @@ const FormPage = styled.div`
 	}
 
 `
+const Contact = ({show}) => {
+	const nodeRef = React.useRef(null)
+	const contacts = [
+		{icon: <Email />, name: 'Email', link: 'mailto:elijaheze777@gmail.com'},
+		{icon: <GitHub />, name: 'Github', link: 'https://github.com/elijh-e'},
+		{icon: <LinkedIn />, name: 'LinkedIn', link: 'https://linkedin.com/elijah-eze-1b367521b'}
+	]
+	return (
+		<CSSTransition
+	    in={show}
+	    nodeRef={nodeRef}
+	    timeout={500}
+	    classNames={{
+	    	enter: styles.animate__animated,
+				enterActive: styles.animate__zoomInUp,
+				exit: styles.animate__animated,
+				exitActive: styles.animate__zoomOutDown
+	    }}
+	    unmountOnExit
+	  >
+	  	<div ref={nodeRef} className='contacts'>
+	  		{contacts.map((contact, i) => <a key={i} href={contact.link} title={contact.name} >{contact.icon}</a>)}
+	  	</div>
+	  </CSSTransition>
+	)
+}
+
 const Auth = ({children}) => {
 	const height = useWinHeight()
+	const [showContact, setContact] = React.useState(false)
+	function handleContactDisplay(state) {
+		setContact(state)
+	}
 	return (
 		<Root height={`${height}px`}>
 
@@ -131,7 +191,13 @@ const Auth = ({children}) => {
 			</div>
 
 			<footer>
-				<span className='subText' > All rights reserved &copy; Webconnect </span>
+				<div className='contact'>
+					<Contact show={showContact} />
+					<span onMouseEnter={() => handleContactDisplay(true)} onMouseOut={() => {}}>
+						Contact developer
+					</span>
+				</div>
+				<span className='subText'> All rights reserved &copy;Webconnect </span>
 			</footer>
 
 		</Root>

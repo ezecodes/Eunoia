@@ -19,7 +19,7 @@ function getRefreshToken(cb) {
 	})
 }
 
-export async function net_service(req_obj) {
+export async function net_service(req_obj, cb = () => {}) {
 	const {method, url} = req_obj
 	const headers = new Headers()
 	headers.append('Content-Type', 'application/json')
@@ -30,26 +30,25 @@ export async function net_service(req_obj) {
 			 	url,
 			 	{method , headers}
 			)
-			if (response.ok) return await response.json()
+			if (response.ok) cb(await response.json())
 			else {
 				if (response.status === 401 && response.statusText === 'Unauthorized') {
-					getRefreshToken(() => net_service(req_obj))
+					getRefreshToken(() => net_service(req_obj, cb))
 				}
 			}
 			return
 		} catch(err) {}
 	} else {
 		try {
-			let body = req_obj.body
+			let body = req_obj?.body || {}
 			let response = await fetch(
 			 	url, 
 			 	{method, headers, body: JSON.stringify(body)}
 			) 
-			console.log(body)
-			if (response.ok) return await response.json()
+			if (response.ok) cb(await response.json())
 			else {
 				if (response.status === 401 && response.statusText === 'Unauthorized') {
-					getRefreshToken(() => net_service(req_obj))
+					getRefreshToken(() => net_service(req_obj, cb))
 				}
 			}
 		} catch(err) {}

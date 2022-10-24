@@ -60,8 +60,10 @@ const UserAvatar = (props) => {
 		...props.style
 	}
 
-	let firstAndLastName = '', 
-			namesToArray = props.username.split(' ')
+	let username = props.username.trimEnd()
+	username = username.trimStart()
+	let firstAndLastName = '';
+	let namesToArray = username.split(' ')
 
 	if (namesToArray.length <= 2) {
 		namesToArray.forEach(i => firstAndLastName += i[0]) 

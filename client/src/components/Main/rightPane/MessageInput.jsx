@@ -9,8 +9,8 @@ import SendIcon from '@material-ui/icons/Send';
 
 function MessageInput({inputValue, sendMessage = () => {}, handleTextInput = () => {}}) {
 	const listenForEnter = (e) => {
-		e.preventDefault()
 		if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey) {
+			e.preventDefault()
 			sendMessage()
 		}
 	}

@@ -4,6 +4,7 @@ import UserAvatar from '../UserAvatar'
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import { makeStyles } from '@material-ui/core/styles';
+import { CSSTransition } from 'react-transition-group';
 
 import CallIcon from '@material-ui/icons/Call'
 import VideocamIcon from '@material-ui/icons/Videocam'
@@ -30,13 +31,12 @@ import Backdrop from '@material-ui/core/Backdrop';
 import PersonPinIcon from '@material-ui/icons/PersonPin';
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 
-import { ReactTransitionGroup } from 'react-transition-group'
-
 import { setUserProfile } from '../../../Redux/features/chatSlice'
 import { setComponents} from '../../../Redux/features/componentSlice'
 
 import Header from '../Header'
 import { useWinHeight } from '../../../hooks/hooks'
+import styles from '../../../stylesheet/transition.css'
 
 const useStyles = makeStyles({
 	
@@ -152,11 +152,12 @@ const actions = [
 ]
 
 
-const UserProfile = ({username, displayName, joined, bio, socials}) => {
+const UserProfile = ({username, displayName, joined, bio, socials, show}) => {
 	const dispatch = useDispatch()
 	const classes = useStyles()
 	const {id} = useSelector(state => state.account.account)
 	const [cur, setCur] = React.useState('')
+	const nodeRef = React.useRef(null)
 	const height = useWinHeight()
 
 	const setComp = (obj) => {
@@ -170,8 +171,19 @@ const UserProfile = ({username, displayName, joined, bio, socials}) => {
   	setCur(name)
   }
 	return (
-		<Slide in={true} direction='left'>
-		<div style={{height: `${height}px`}}>
+		<CSSTransition
+	    in={show}
+	    nodeRef={nodeRef}
+	    timeout={500}
+	    classNames={{
+	    	enter: styles.animate__animated,
+				enterActive: styles.animate__fadeInRight,
+				exit: styles.animate__animated,
+				exitActive: styles.animate__fadeOutRight
+	    }}
+	    unmountOnExit
+	  >
+		<div style={{height: `${height}px`}} ref={nodeRef}>
 			<Header>
 				<IconButton onClick={() => setComp({component: 'profile', value: false})} >
 					<KeyboardArrowLeftIcon />
@@ -229,7 +241,7 @@ const UserProfile = ({username, displayName, joined, bio, socials}) => {
 		    </div>}
 			</div>
 		</div>
-		</Slide>
+		</CSSTransition>
 	)
 }
 
