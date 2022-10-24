@@ -152,7 +152,7 @@ const Contact = ({show}) => {
 	const contacts = [
 		{icon: <Email />, name: 'Email', link: 'mailto:elijaheze777@gmail.com'},
 		{icon: <GitHub />, name: 'Github', link: 'https://github.com/elijh-e'},
-		{icon: <LinkedIn />, name: 'LinkedIn', link: 'https://linkedin.com/elijah-eze-1b367521b'}
+		{icon: <LinkedIn />, name: 'LinkedIn', link: 'https://linkedin.com/in/elijah-eze-1b367521b'}
 	]
 	return (
 		<CSSTransition
