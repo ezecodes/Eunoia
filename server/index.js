@@ -4,7 +4,7 @@ const io = require('./socs')
 const app = require('./app.js')
 const server = require('http').createServer(app)
 const port = process.env.PORT || 3002;
-const DB_URI = process.env.LOCALURI
+const DB_URI = process.env.URI
 
 const db = mongoose.connection
 mongoose.connect(DB_URI , {
