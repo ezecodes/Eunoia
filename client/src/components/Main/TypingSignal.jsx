@@ -20,7 +20,7 @@ function TypingSignal({children}) {
 	return (
 		<span className={classes.root}>
 			{children}
-			<Preloader use={ThreeDots} size={32} strokeWidth={12} strokeColor='pink' duration={800} /> 
+			<Preloader use={ThreeDots} size={32} strokeWidth={12} strokeColor='#6495ed' duration={800} /> 
 		</span>
 	)
 }

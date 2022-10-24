@@ -42,6 +42,8 @@ import {
 	alertGroupDeletion
 } from '../../../Redux/features/recentChatsSlice'
 
+import image1 from '../../../../public/images/undraw_quick_chat_re_bit5.svg'
+import styled from 'styled-components'
 import {
 	deleteGroup
 } from '../../../Redux/features/groupSlice'
@@ -99,6 +101,34 @@ const useStyles = makeStyles({
 	},
 	
 })
+
+const RootEmpty = styled.div`
+	display: flex;
+	flex-direction: column;
+	padding: 30px 10px 0 10px;
+	justify-content: center;
+	align-items: center;
+
+	em {
+		margin: 23px 0;
+		color: #702828;
+	}
+
+	img {
+		width: 90%;
+	}
+`
+
+const Empty = ({}) => {
+	return (
+		<Fade in={true}>
+			<RootEmpty>
+				<em>Your chat history is currently empty</em>
+				<img src={image1} alt="Quick chat" />
+			</RootEmpty>
+		</Fade>
+	)
+}
 
 const RecentChats = ({className}) => {
 	const showRecentChats = useSelector(state => state.components.stack.recentChats)
@@ -186,6 +216,8 @@ const RecentChats = ({className}) => {
 	const openDial = () => setDialVisibility(true)
 	const closeDial = () => setDialVisibility(false)
 
+	
+
 	return (
 			<section className={[classes.recentChats, className].join(' ')}
 				onMouseEnter={openDial}
@@ -197,7 +229,7 @@ const RecentChats = ({className}) => {
 						setComp({parent: 'stack', component: 'settings'})
 					}}
 					>
-						<AccountCircleRoundedIcon style={{color: '#6e84ab'}} />
+						<AccountCircleRoundedIcon style={{color: '#6680af'}} />
 						{/*<Typography variant='inherit'> Profile </Typography>*/}
 					</IconButton>
 					
@@ -237,6 +269,7 @@ const RecentChats = ({className}) => {
 					</Menu>
 
 				</Header>
+				{recentChats.length === 0 ? <Empty /> :
 				<div className={classes.userslist}>
 					{
 						showLoader ? <Preloader /> : 
@@ -300,7 +333,7 @@ const RecentChats = ({className}) => {
 							}
 						})
 					}
-				</div>
+				</div>}
 
 				{ assert(chatToBeCleared) &&
 					<Dialog

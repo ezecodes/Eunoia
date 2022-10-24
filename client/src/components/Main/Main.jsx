@@ -4,6 +4,7 @@ import { Outlet } from 'react-router-dom'
 import { makeStyles } from '@material-ui/core/styles';
 import grey from '@material-ui/core/colors/grey';
 import { useWinHeight } from '../../hooks/hooks'
+import AppLoader from './AppLoader'
 import {
 	storeRecentChats,
 	setUnread, 
@@ -27,7 +28,7 @@ import { storeAccountData, setOnline } from '../../Redux/features/accountSlice'
 import { storeReceivedChat, setChatRead, handleStarredChat, performChatDelete } from '../../Redux/features/chatSlice'
 
 import { handleDisconnectedUser, setOnlineUsers} from '../../Redux/features/socketSlice'
-import { setComponents} from '../../Redux/features/componentSlice'
+import { setComponents, displayApp} from '../../Redux/features/componentSlice'
 import { 
 	storeReceivedGroupChat,
 	performGroupChatDelete, 
@@ -41,7 +42,8 @@ import {
 
 import { assert, handleFetch } from '../../lib/script'
 import init, { socket } from '../../sockets/init'
-import LeftPane from './leftPane/LeftPane'
+
+const LeftPane = React.lazy(() => import('./leftPane/LeftPane'))
 
 import { getAccountData } from '../../api/account'
 import { getRecentChats } from '../../api/recent-chat'
@@ -62,7 +64,7 @@ const Main = ({user}) => {
 	const classes = useStyles()
 	const dispatch = useDispatch()
 	const selectedUser = useSelector(state => state.other.currentSelectedUser)
-	const {leftPane, rightPane} = useSelector(state => state.components)
+	const {leftPane, rightPane, app} = useSelector(state => state.components)
 	const activeUsers = useSelector(state => state.activeUsers.activeUsers)
 	const selectedGroup = useSelector(state => state.groups.selectedGroup)
 	const fetchedUsers = useSelector(state => state.other.fetched)
@@ -76,6 +78,9 @@ const Main = ({user}) => {
 
 		getAccountData((res) => {
 			dispatch(storeAccountData(res))
+			if (res) {
+				dispatch(displayApp(true))
+			}
 		})
 		getRecentChats(res => {
 			dispatch(storeRecentChats(res))
@@ -146,11 +151,10 @@ const Main = ({user}) => {
 		dispatch(storeReceivedGroupChat({_id, chat}))
 
 		if ((assert(selectedGroup) && selectedGroup._id !== _id) || !assert(selectedGroup)) {
-			sendGroupUnread({groupId: _id, chatId: chat.chatId})
-			dispatch(setGroupUnread({_id, chatId: chat.chatId}))
+			setGroupUnread({groupId: _id, chatId: chat.chatId})
+			dispatch(storeGroupUnread({_id, chatId: chat.chatId}))
 		} 
 		
-		if (fetchedGroups.some(i => i === _id)) return  
 		dispatch(updateRecentGroupChats({_id, lastChat: chat}))
 	})
 
@@ -168,17 +172,13 @@ const Main = ({user}) => {
 		function handleDispatch() {
 			dispatch(storeReceivedChat(chat))
 
-			/// checks if messages with the sender has been fetched, else update recentChats
-			// N/B updateRecentChats is also called/referenced at messages useEffect
-			if (fetchedUsers.some(i => i.username === chat.sender)) return  
-
 			dispatch(updateRecentChats({
 				username: chat.sender,
 				lastChat: chat.message,
 			}))
 		}
 
-		if (activeUsers.find(i => i.username === chat.sender) !== undefined) {
+		if (activeUsers.find(i => i.username === chat.sender)) {
 			handleDispatch()
 		} else {
 			getActiveUsers(res => {
@@ -192,6 +192,7 @@ const Main = ({user}) => {
 			saveUnreadChat({sender: chat.sender, chatId: chat.message.chatId})
 			dispatch(setUnread({friendsName: chat.sender, chatId: chat.message.chatId}))
 		}
+
 		if (assert(selectedUser) && selectedUser.username === chat.sender) {
 			socket.emit('chatIsRead', {
 				sender: selectedUser.username,
@@ -210,10 +211,14 @@ const Main = ({user}) => {
 		dispatch(setTypingStatus(obj))
 	})
 
+	if (!app.display) return <AppLoader />
+
 	return (
-		<section className={classes.main} style={{
-			height: winHeight + 'px'
-		}}>
+		<section className={classes.main} 
+			style={{
+				height: winHeight + 'px',
+			}}
+		>
 			{leftPane && <LeftPane />}
 			<Outlet />
 		</section>

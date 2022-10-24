@@ -379,23 +379,7 @@ const UserMessagesPane = ({friend, typingStatus, onlineStatus, lastSeen}) => {
 						<Button onClick={() => undoDelete()} style={{color: '#ffc4cf'}}> UNDO </Button>
 					}
 				/>
-				{/*<Snackbar 
-	    		open={showHelper}
-	    		onClose={closeHelper}
-			 		anchorOrigin={{
-						vertical: 'bottom',
-						horizontal: 'center',
-					}}
-		    	classNames={[classes.bottomSnackbar, classes.snackbar].join(' ')}
-					autoHideDuration={3000}
-				>
-				  <MuiAlert variant='filled' elevation={6} onClose={closeHelper} severity={'info'}>
-				    <span> 
-	    					Press <code className={classes.codeEle} > win + Period (<strong> . </strong>) </code> to use emoji
-	    				</span>
-				  </MuiAlert>
-				</Snackbar>
-*/}
+				
 				{assert(selectedChat) && assert(pos) && 
 				<ChatActions 
 					open={assert(selectedChat)} 

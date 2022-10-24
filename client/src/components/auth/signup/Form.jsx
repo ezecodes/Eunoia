@@ -92,7 +92,7 @@ const Form = () => {
 				handleError(errObj, res.error)
 			} else {
 				storeCredentials(res, () => {
-					successMsg('Log in successful ✌')
+					successMsg('Registration successful ✌')
 					handleButtonState(false)
 					document.location = '/'
 				})

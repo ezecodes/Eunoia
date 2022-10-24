@@ -85,7 +85,6 @@ const recentChatsSlice = createSlice({
 			const find = state.recentChats.findIndex(i => i.username === friendsName)
 
 			if (find !== -1) {
-
 				state.recentChats[find].unread.push(chatId)
 			}
 			
@@ -100,7 +99,7 @@ const recentChatsSlice = createSlice({
 				state.recentChats[index].lastChat = lastChat
 
 			} else {
-				action.payload = {...action.payload, ...defaultStates, online: true}
+				action.payload = {...action.payload, ...defaultStates, unread: [], online: true}
 				action.payload.lastSent = lastSent
 				state.recentChats.unshift(action.payload)
 			}
@@ -152,7 +151,7 @@ const recentChatsSlice = createSlice({
 
 			const find = state.recentChats.findIndex(i => i.chatType === 'group' && i._id === _id)
 
-			if (find) {
+			if (find !== -1) {
 				state.recentChats[find] = {...state.recentChats[find], ...field}
 			}
 

@@ -9,7 +9,7 @@ const Login = () => {
 		<Zoom in={true}>
 			<div className='pageBody'>
 				<header className='formHeader'> 
-					<Typography component='h1'> <span className='textYellow'> Hi there, </span> Welcome back 👏👏 </Typography>
+					<Typography component='h1'> <span className='textYellow'> Hi there, </span> Welcome back 👏 </Typography>
 					<Typography variant='body1' className='subText'> Log in with the data you entered during your registration. </Typography>
 				</header>
 

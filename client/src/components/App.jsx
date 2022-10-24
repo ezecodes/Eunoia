@@ -5,15 +5,14 @@ import { Route, Routes, useNavigate } from 'react-router-dom'
 import { createTheme, ThemeProvider } from '@material-ui/core/styles'
 import SafeComponent from './SafeComponent'
 
-import RightPane from './main/rightPane/RightPane'
-
 import HelperAlert from './HelperAlert'
+import ComponentLoader from './ComponentLoader'
 
-import Auth from './auth/Auth' 
-import SignUp from './auth/signup/Signup'
-import Login from './auth/login/Login'
-
-import Main from './main/Main'
+const RightPane = React.lazy(() => import('./main/rightPane/RightPane'))
+const Main = React.lazy(() => import('./main/Main'))
+const Auth = React.lazy(() => import('./auth/Auth' ))
+const Login = React.lazy(() => import('./auth/login/Login'))
+const SignUp = React.lazy(() =>import('./auth/signup/Signup') )
 
 const theme = createTheme({
 	palette: {
@@ -43,20 +42,20 @@ const App = () => {
 	return (
 		<ThemeProvider theme={theme}>
 			<section>
-					{/*<SafeComponent>*/}
-						<Routes>
-							{JSON.parse(sessionStorage.getItem('jwt')) && 
-								<Route path='/' element={<Main /> } >
-									<Route path='/' element={<RightPane />} />
-								</Route>
-							}
-							<Route path='/auth' element={<Auth />}>
-								<Route path='/auth/signup' exact element={<SignUp /> } />
-								<Route path='/auth/login' element={<Login /> } />
+				<React.Suspense fallback={<ComponentLoader />}>
+					<Routes>
+						{JSON.parse(sessionStorage.getItem('jwt')) && 
+							<Route path='/' element={<Main /> } >
+								<Route path='/' element={<RightPane />} />
 							</Route>
-						</Routes>
-					{/*</SafeComponent>*/}
+						}
+						<Route path='/auth' element={<Auth />}>
+							<Route path='/auth/signup' exact element={<SignUp /> } />
+							<Route path='/auth/login' element={<Login /> } />
+						</Route>
+					</Routes>
 				<HelperAlert />
+				</React.Suspense>
 			</section>
 		</ThemeProvider>
 	)

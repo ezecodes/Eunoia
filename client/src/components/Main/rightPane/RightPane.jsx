@@ -11,16 +11,18 @@ import SearchIcon from '@material-ui/icons/Search'
 import { Link } from 'react-router-dom'
 import ArrowBackIosIcon from '@material-ui/icons/ArrowBackIos';
 import { makeStyles } from '@material-ui/core/styles';
+import { CSSTransition } from 'react-transition-group';
 
 import { assert } from '../../../lib/script'
 import { useWinHeight } from '../../../hooks/hooks'
 import UserAvatar from '../UserAvatar'
-import UserMessagesPane from './UserMessagesPane'
-import UserProfile from './UserProfile'
-import GroupMessagesPane from './GroupMessagesPane'
-import GroupInfo from './GroupInfo'
-import GroupSettings from './GroupSettings'
-import AddGroupMembers from './AddGroupMembers'
+
+const UserMessagesPane = React.lazy(() => import('./UserMessagesPane'))
+const UserProfile = React.lazy(() => import('./UserProfile'))
+const GroupMessagesPane = React.lazy(() => import('./GroupMessagesPane'))
+const GroupInfo = React.lazy(() => import('./GroupInfo'))
+const GroupSettings = React.lazy(() => import('./GroupSettings'))
+const AddGroupMembers = React.lazy(() => import('./AddGroupMembers'))
 
 const useStyles = makeStyles({
 	rightPane: {
@@ -78,6 +80,8 @@ const RightPane = ({user}) => {
 	const showUserProfile = useSelector(state => state.chat.showUserProfile)
 	const {gSettings, gRoot, gMembers} = useSelector(state => state.components.gInfos)
 
+	const UserProfileRef = React.createRef(null)
+
 	const [anchorEl, setAnchorEl] = React.useState(null)
 	const height = useWinHeight()
 	const open = Boolean(anchorEl)
@@ -96,7 +100,6 @@ const RightPane = ({user}) => {
 			{
 				assert(groupChats) &&
 				groupChats.map((groupChat, i) => {
-
 					const isCurrentSelected = () => {
 						if (assert(selectedGroup) && selectedGroup._id === groupChat._id) {
 							return true
@@ -105,36 +108,36 @@ const RightPane = ({user}) => {
 				
 					return (
 						isCurrentSelected() &&
-						<div className={classes.panes} key={groupChat._id} style={{
-							display: isCurrentSelected() ? 'flex' : 'none'
-						}} >
+						<div 
+							className={classes.panes} 
+							key={groupChat._id} 
+							style={{
+								display: isCurrentSelected() ? 'flex' : 'none'
+							}} 
+						>
 							<GroupMessagesPane {...groupChat} isCurrentSelected={isCurrentSelected()}  />
 
-							{ gRoot &&
-				      	<GroupInfo
-					      	{...groupChat}
-					      />
-					    }
+			      	<GroupInfo
+			      		show={gRoot}
+				      	{...groupChat}
+				      />
 
-					    {
-					    	gMembers && 
-					    	<AddGroupMembers
-					    		_id={groupChat._id}
-					    		activeUsers={activeUsers}
-					    		participants={groupChat.participants}
-					    	/>
-					    }
+				    	<AddGroupMembers
+				    		show={gMembers}
+				    		_id={groupChat._id}
+				    		activeUsers={activeUsers}
+				    		participants={groupChat.participants}
+				    	/>
 
-				      { gSettings &&
-				      	<GroupSettings 
-					      	_id={groupChat._id}
-					      	isAdmin={groupChat.admins.some(i => i.username === username)}
-					      	name={groupChat.name}
-					      	description={groupChat.description}
-					      	createdBy={groupChat.createdBy}
-					      	settings={groupChat.settings}
-					      />
-					    }
+			      	<GroupSettings 
+			      		show={gSettings}
+				      	_id={groupChat._id}
+				      	isAdmin={groupChat.admins.some(i => i.username === username)}
+				      	name={groupChat.name}
+				      	description={groupChat.description}
+				      	createdBy={groupChat.createdBy}
+				      	settings={groupChat.settings}
+				      />
 						</div>
 					)
 				})
@@ -167,13 +170,11 @@ const RightPane = ({user}) => {
 									onlineStatus={userInAll().online}
 									lastSeen={userInAll().lastSeen}
 								/>
-
-								{showUserProfile && isSelectedUser() &&
-									<UserProfile 
-										{...friend}
-										{...userInAll()}
-									/>
-								}
+								<UserProfile 
+									{...friend}
+									show={showUserProfile && isSelectedUser()}
+									{...userInAll()}
+								/>
 							</div>
 						)
 					})

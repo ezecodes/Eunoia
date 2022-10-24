@@ -2,7 +2,6 @@ import React from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 
 import { makeStyles } from '@material-ui/core/styles';
-import Slide from '@material-ui/core/Slide';
 import Avatar from '@material-ui/core/Avatar'
 import IconButton from '@material-ui/core/IconButton'
 import Typography from '@material-ui/core/Typography';
@@ -32,9 +31,11 @@ import UserAvatar from '../UserAvatar'
 import ChatActions from '../ChatActions'
 
 import { setComponents} from '../../../Redux/features/componentSlice'
+import { CSSTransition } from 'react-transition-group';
 
 import { retrieveDate } from '../../../lib/script'
 import emit from '../../../sockets/outgoing'
+import styles from '../../../stylesheet/transition.css'
 
 const useStyles = makeStyles({
 	backdrop: {
@@ -302,6 +303,7 @@ function GroupInfo({participants, _id, name, description, show, createdBy, admin
 	const [open, setOpen] = React.useState(false)
 	const [loading, setLoader] = React.useState('')
 	const activeUsers = useSelector(state => state.activeUsers.activeUsers)
+	const nodeRef = React.useRef(null)
 	participants = participants.filter((i) => i).sort((a, b) => {
 		if (a.username === createdBy.username && b.username !== createdBy.username) {
 			return -1
@@ -369,8 +371,19 @@ function GroupInfo({participants, _id, name, description, show, createdBy, admin
 	}
 	return (
 		<>
-		<Slide in={true} direction='left'>
-			<div className={classes.groupInfo}>
+		<CSSTransition
+	    in={show}
+	    nodeRef={nodeRef}
+	    timeout={500}
+	    classNames={{
+	    	enter: styles.animate__animated,
+				enterActive: styles.animate__fadeInRight,
+				exit: styles.animate__animated,
+				exitActive: styles.animate__fadeOutRight
+	    }}
+	    unmountOnExit
+	  >
+			<div className={classes.groupInfo} ref={nodeRef} >
 			<div className={classes.info}>
 				<div className={classes.header}>
 					<IconButton onClick={setDisplay}> 
@@ -447,7 +460,7 @@ function GroupInfo({participants, _id, name, description, show, createdBy, admin
 			
 			</div>
 
-		</Slide>
+		</CSSTransition>
 		</>
 	)
 }
