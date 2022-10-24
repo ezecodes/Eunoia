@@ -59,9 +59,9 @@ import { editAccountInfo} from '../../../../Redux/features/accountSlice'
 import UserAvatar from '../../UserAvatar'
 import Header from '../../Header'
 import NetworkProgress from '../../NetworkProgress'
+import ProfileEditor from './ProfileEditor'
 
-const ProfileEditor = React.lazy(() => import('./ProfileEditor'))
-
+import { handleFetch } from '../../../../lib/script'
 import { setNotify , logout} from '../../../../api/account'
 import { clearAuth } from '../../../../helpers/auth-helper'
 
@@ -243,7 +243,6 @@ const Settings = ({className}) => {
 	const callToLogout = () => {
 		logout(res => {
 			clearAuth()
-			document.location = '/'
 		})
 	}
 
