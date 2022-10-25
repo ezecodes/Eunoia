@@ -58,7 +58,7 @@ import { editAccountInfo} from '../../../../Redux/features/accountSlice'
 
 import UserAvatar from '../../UserAvatar'
 import Header from '../../Header'
-import NetworkProgress from '../../NetworkProgress'
+import NetworkProgress from '../../../NetworkProgress'
 import ProfileEditor from './ProfileEditor'
 
 import { handleFetch } from '../../../../lib/script'

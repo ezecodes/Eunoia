@@ -26,7 +26,7 @@ import { handleAlert } from '../../../../Redux/features/otherSlice'
 import { useDispatch, useSelector } from 'react-redux'
 
 import Header from '../../Header'
-import NetworkProgress from '../../NetworkProgress'
+import NetworkProgress from '../../../NetworkProgress'
 import { matchPassword, resetPassword } from './api-helper'
 
 const useStyles = makeStyles({

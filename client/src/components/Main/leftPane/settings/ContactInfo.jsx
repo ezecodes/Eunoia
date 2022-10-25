@@ -52,7 +52,7 @@ import { handleAlert } from '../../../../Redux/features/otherSlice'
 import { setNewSocial, handleDeleteSocial } from '../../../../Redux/features/accountSlice'
 
 import Header from '../../Header'
-import NetworkProgress from '../../NetworkProgress'
+import NetworkProgress from '../../../NetworkProgress'
 import { updateSocials, deleteSocial } from './api-helper'
 
 const useStyles = makeStyles({

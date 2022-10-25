@@ -32,7 +32,7 @@ import { handleAlert } from '../../../Redux/features/otherSlice'
 
 import UserAvatar from '../UserAvatar'
 import Header from '../Header'
-import NetworkProgress from '../NetworkProgress'
+import NetworkProgress from '../../NetworkProgress'
 import Preloader from '../../Preloader'
 import SearchBar from '../SearchBar'
 

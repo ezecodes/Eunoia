@@ -21,5 +21,6 @@ app.use(express.static('dist'))
 app.get('/', (req, res) => { 
 	res.sendFile('index.html', {root: path.join(__dirname, '/dist')})
 })
+app.get('/auth*', (req, res) => res.redirect('/'))
 
 module.exports = app

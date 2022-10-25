@@ -31,7 +31,7 @@ import styles from '../../../stylesheet/transition.css'
 
 import Header from '../Header'
 import Loader from './Loader'
-import NetworkProgress from '../NetworkProgress'
+import NetworkProgress from '../../NetworkProgress'
 
 import { handleAlert } from '../../../Redux/features/otherSlice'
 import { setComponents} from '../../../Redux/features/componentSlice'
