@@ -6,24 +6,40 @@ services:
     build:
       dockerfile: Dockerfile
       context: ./client
-    working_dir: /usr/appclient
+    working_dir: /usr/eunoia/appclient
     environment:
-      NODE_ENV: production
+      NODE_ENV: development
     ports:
       - 4000:4000
     volumes:
-      - ./client/:/usr/appclient
+      - ./client/:/usr/eunoia/appclient
     depends_on: 
       - appserver
-    command: ["npm", "start"]
+    command: ["npm", "run", "dev"]
 
   appserver:
     container_name: appserver
     build:
       dockerfile: Dockerfile
       context: ./server
+    working_dir: /usr/eunoia/appserver
+    environment:
+      NODE_ENV: development
+      DB_URI: mongodb://appdb:27017/eunoia
+      PORT: 4200
+      JWT_PRIVATE: 123jwt
     ports:
       - 4200:4200
     volumes:
-      - ./server/:/usr/appserver
-    command: ["npm", "start"]
+      - ./server/:/usr/eunoia/appserver
+    depends_on: 
+      - appdb
+    command: ["npm", "run", "dev"]
+
+  appdb:
+    container_name: appdb
+    image: mongo:4.4.25-focal
+    ports:
+      - 27017:27017
+    volumes:
+      - ./:/usr/data/db/eunoia

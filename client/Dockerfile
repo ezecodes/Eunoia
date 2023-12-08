@@ -3,4 +3,3 @@ WORKDIR /usr/eunoia/appclient
 COPY ./package.json .
 RUN npm install
 COPY ./ .
-RUN npm run build
