@@ -14,7 +14,7 @@ const SignUp = () => {
 		<Zoom in={true} >
 			<div className='pageBody'>
 				<header className='formHeader'> 
-					<Typography component='h1'> Welcome to <strong> Webconnect </strong> </Typography>
+					<Typography component='h1'> Welcome to <strong> Eunoia </strong> </Typography>
 					<Typography variant='body1' className='subText'> Register your account </Typography>
 				</header>
 
