@@ -1,12 +1,10 @@
 {
-  "name": "Webconnect",
+  "name": "Eunoia",
   "version": "1.0.0",
   "description": "Chat app built with mern",
   "main": "index.js",
   "scripts": {
     "dev": "nodemon index.js",
-    "client": "cd ../client && npm start",
-    "localMode": "concurrently \"npm run dev\" \"npm run client \" ",
     "start": "node index.js"
   },
   "nodemonConfig": {
@@ -24,13 +22,13 @@
     "nodemon": "^2.0.15"
   },
   "dependencies": {
-    "bcrypt": "^5.0.1",
+    "bcrypt": "^5.1.1",
     "concurrently": "^7.0.0",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "dotenv": "^16.0.0",
     "express": "^4.17.2",
-    "jsonwebtoken": "^8.5.1",
+    "jsonwebtoken": "^9.0.2",
     "mongoose": "^6.2.6",
     "shado": "^1.5.0",
     "socket.io": "^4.4.1",
