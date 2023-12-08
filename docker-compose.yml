@@ -1,0 +1,29 @@
+version: "3"
+
+services:
+  appclient:
+    container_name: appclient
+    build:
+      dockerfile: Dockerfile
+      context: ./client
+    working_dir: /usr/appclient
+    environment:
+      NODE_ENV: production
+    ports:
+      - 4000:4000
+    volumes:
+      - ./client/:/usr/appclient
+    depends_on: 
+      - appserver
+    command: ["npm", "start"]
+
+  appserver:
+    container_name: appserver
+    build:
+      dockerfile: Dockerfile
+      context: ./server
+    ports:
+      - 4200:4200
+    volumes:
+      - ./server/:/usr/appserver
+    command: ["npm", "start"]
