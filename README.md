@@ -13,8 +13,9 @@ To set up both the client and server components using Docker, execute the follow
 - *`docker compose -f docker-compose-dev.yml build`*
 - *`docker compose -f docker-compose-dev.yml up`* <br>
 These commands will build and launch the client and server components in separate Docker containers, setting up the app in development mode.
+
 ## 3. Launching the App:
-Once the setup is complete, visit *http://localhost:4000* in your to access the Eunoia chat app client.
+Once the setup is complete, visit *http://localhost:4000* in your browser to access the Eunoia chat app client.
 
 # Contributing:
 If you're new to contributing to open-source projects or our codebase, here are a few steps to get you started:
