@@ -6,7 +6,7 @@
   "proxy": "http://localhost:4100",
   "main": "index.js",
   "scripts": {
-    "dev": "webpack-dev-server --mode development --open --hot --port 4400",
+    "dev": "webpack-dev-server --mode development --open --hot --port 4000",
     "build": "webpack --mode production"
   },
   "keywords": [],
