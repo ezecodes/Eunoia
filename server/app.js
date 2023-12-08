@@ -16,11 +16,4 @@ app.use('/auth/', authRoute)
 app.use('/account/', accountRoute)
 app.use('/chat/', chatRoute)
 
-app.use(express.static('dist'))
-
-app.get('/', (req, res) => { 
-	res.sendFile('index.html', {root: path.join(__dirname, '/dist')})
-})
-app.get('/auth*', (req, res) => res.redirect('/'))
-
 module.exports = app
