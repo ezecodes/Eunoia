@@ -197,7 +197,7 @@ const Auth = ({children}) => {
 						Contact developer
 					</span>
 				</div>
-				<span className='subText'> All rights reserved &copy;Webconnect </span>
+				<span className='subText'> All rights reserved &copy;Eunoia </span>
 			</footer>
 
 		</Root>

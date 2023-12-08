@@ -1,12 +1,12 @@
 {
-  "name": "webconnect",
+  "name": "Eunoia",
   "version": "1.0.0",
   "private": false,
   "description": "",
-  "proxy": "http://localhost:3001",
+  "proxy": "http://localhost:4100",
   "main": "index.js",
   "scripts": {
-    "start": "webpack-dev-server --mode development --open --hot --port 3100",
+    "dev": "webpack-dev-server --mode development --open --hot --port 4400",
     "build": "webpack --mode production"
   },
   "keywords": [],
