@@ -10,7 +10,7 @@ const htmlPlugin = new HtmlWebpackPlugin({
 module.exports = {
   entry: "./src",
   output: {
-    path: path.resolve(__dirname, "../server/dist"),
+    path: path.resolve(__dirname, "dist"),
     filename: "bundle.js",
   },
   "devServer": {
@@ -20,7 +20,7 @@ module.exports = {
     "proxy": {
       "/": {
         "target": "http://localhost:4000",
-        "router":  () => "http://localhost:3002"
+        "router":  () => "http://localhost:4200"
       }
     },
     static: {
