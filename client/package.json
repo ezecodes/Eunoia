@@ -7,7 +7,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "webpack-dev-server --mode development --open --hot --port 4000",
-    "build": "webpack --mode production"
+    "build": "webpack --mode production --config webpack.config.js"
   },
   "browser": {
     "[module-name]": false   
