@@ -7,7 +7,8 @@
   "main": "index.js",
   "scripts": {
     "dev": "webpack-dev-server --mode development --open --hot --port 4000",
-    "build": "webpack --mode production --config webpack.config.js"
+    "build": "webpack --mode production --config webpack.config.js",
+    "pm2": "pm2 serve dist/ 4000 --spa --name eunoiaclient"
   },
   "browser": {
     "[module-name]": false   
