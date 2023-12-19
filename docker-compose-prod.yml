@@ -15,7 +15,7 @@ services:
       - ./client/:/usr/appclient
     depends_on: 
       - appserver
-    command: ["pm2", "serve", "dist/", "4000", "--spa"]
+    command: ["pm2", "serve", "dist/", "4000", "--spa", "--name", "eunoiaclient"]
 
   appserver:
     container_name: appserver
