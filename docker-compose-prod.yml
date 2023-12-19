@@ -15,7 +15,7 @@ services:
       - ./client/:/usr/appclient
     depends_on: 
       - appserver
-    command: ["npx", "serve", "dist/"]
+    command: ["pm2", "serve", "dist/", "4000", "--spa"]
 
   appserver:
     container_name: appserver

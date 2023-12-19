@@ -9,6 +9,9 @@
     "dev": "webpack-dev-server --mode development --open --hot --port 4000",
     "build": "webpack --mode production"
   },
+  "browser": {
+    "[module-name]": false   
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
