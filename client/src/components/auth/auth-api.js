@@ -1,6 +1,6 @@
 export const signIn = async (user, cb) => {
 	try {
-		let response = await fetch('/auth/login', {
+		let response = await fetch('http://localhost:4200' + '/auth/login', {
 			method: 'POST',
 			headers: {
 				'content-type': 'application/json',
@@ -16,7 +16,7 @@ export const signIn = async (user, cb) => {
 
 export const register = async (user) => {
 	try {
-		let response = await fetch('/auth/register', {
+		let response = await fetch('http://localhost:4200' + '/auth/register', {
 			method: 'POST',
 			headers: {
 				'content-type': 'application/json',

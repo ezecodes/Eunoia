@@ -1,45 +1,37 @@
 version: "3"
 
 services:
-  appclient:
-    container_name: appclient
+  eunoia_client:
+    container_name: eunoia_client
     build:
-      dockerfile: Dockerfile
       context: ./client
-    working_dir: /usr/eunoia/appclient
+    working_dir: /var/www/eunoia/client
     environment:
-      NODE_ENV: development
+      NODE_ENV: production
+      PORT: 4000
     ports:
       - 4000:4000
     volumes:
-      - ./client/:/usr/eunoia/appclient
+      - ./client/:/var/www/eunoia/client
     depends_on: 
-      - appserver
-    command: ["npm", "run", "dev"]
+      - eunoia_server
 
-  appserver:
-    container_name: appserver
-    build:
-      dockerfile: Dockerfile
-      context: ./server
-    working_dir: /usr/eunoia/appserver
+  eunoia_server:
+    container_name: eunoia_server
     environment:
-      NODE_ENV: development
-      DB_URI: mongodb://appdb:27017/eunoia
-      PORT: 4200
-      JWT_PRIVATE: 123jwt
+      - PORT: 4200
+      - NODE_ENV: production
+    build:
+      context: ./server
     ports:
       - 4200:4200
     volumes:
-      - ./server/:/usr/eunoia/appserver
-    depends_on: 
-      - appdb
-    command: ["npm", "run", "dev"]
+      - ./server/:/var/www/eunoia/server
 
-  appdb:
-    container_name: appdb
-    image: mongo:4.4.25-focal
+  nginx_server:
+    image: nginx:1.25.3-alpine
+    restart: always
+    volumes: 
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
     ports:
-      - 27017:27017
-    volumes:
-      - ./:/usr/data/db/eunoia
+      - 8442:8442

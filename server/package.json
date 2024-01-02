@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "nodemon index.js",
     "start": "node index.js",
-    "pm2": "pm2 start index.js --port 4300 --name eunoiaserver"
+    "pm2": "pm2 start index.js --name euserver -- --port 4200"
   },
   "nodemonConfig": {
     "watch": [
@@ -31,6 +31,7 @@
     "express": "^4.17.2",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^6.2.6",
+    "morgan": "^1.10.0",
     "shado": "^1.5.0",
     "socket.io": "^4.4.1",
     "uuid": "^8.3.2"

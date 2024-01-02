@@ -11,7 +11,7 @@ function getRefreshToken(cb) {
 		headers
 	}
 
-	fetch('/auth/refresh', req_options)
+	fetch('http://localhost:4200' + '/auth/refresh', req_options)
 	.then(res => res.json())
 	.then(data => {
 		storeJwt(data.jwt)
@@ -27,7 +27,7 @@ export async function net_service(req_obj, cb = () => {}) {
 	if (method.toUpperCase() === "GET") {
 		try {
 			let response = await fetch(
-			 	url,
+			 	'http://localhost:4200' + url,
 			 	{method, headers}
 			)
 			if (response.ok) cb(await response.json())
@@ -42,7 +42,7 @@ export async function net_service(req_obj, cb = () => {}) {
 		try {
 			let body = req_obj?.body || {}
 			let response = await fetch(
-			 	url, 
+			 	'http://localhost:4200' + url, 
 			 	{method, headers, body: JSON.stringify(body)}
 			) 
 			if (response.ok) cb(await response.json())
