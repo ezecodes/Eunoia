@@ -19,8 +19,8 @@ services:
   eunoia_server:
     container_name: eunoia_server
     environment:
-      - PORT: 4200
-      - NODE_ENV: production
+      PORT: 4200
+      NODE_ENV: production
     build:
       context: ./server
     ports:
