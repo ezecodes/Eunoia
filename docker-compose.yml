@@ -1,0 +1,22 @@
+version: "3"
+
+services:
+  eunoia_server_1:
+    container_name: eunoia_server_1
+    build: .
+    environment:
+      PORT: 4200
+      NODE_ENV: production
+    ports:
+      - 4200:4200
+    working_dir: /var/www/eunoia
+    volumes:
+      - ./server/:/var/www/eunoia
+
+  nginx_server:
+    image: nginx:1.25.3-alpine
+    restart: always
+    volumes: 
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    ports:
+      - 8442:8442

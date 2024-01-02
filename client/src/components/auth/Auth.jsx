@@ -151,7 +151,7 @@ const Contact = ({show}) => {
 	const nodeRef = React.useRef(null)
 	const contacts = [
 		{icon: <Email />, name: 'Email', link: 'mailto:elijaheze777@gmail.com'},
-		{icon: <GitHub />, name: 'Github', link: 'https://github.com/elijh-e'},
+		{icon: <GitHub />, name: 'Github', link: 'https://github.com/jahdevelops'},
 		{icon: <LinkedIn />, name: 'LinkedIn', link: 'https://linkedin.com/elijah-eze-1b367521b'}
 	]
 	return (
