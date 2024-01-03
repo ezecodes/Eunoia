@@ -16,10 +16,10 @@ app.use('/auth/', authRoute)
 app.use('/account/', accountRoute)
 app.use('/chat/', chatRoute)
 
-app.use(express.static('client_build'))
+app.use(express.static('dist'))
 
 app.get('/', (req, res) => { 
-	res.sendFile('index.html', {root: path.join(__dirname, '../client_build')})
+	res.sendFile('index.html', {root: path.join(__dirname, 'dist')})
 })
 
 module.exports = app

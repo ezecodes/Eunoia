@@ -10,7 +10,7 @@ const htmlPlugin = new HtmlWebpackPlugin({
 module.exports = {
   entry: "./src",
   output: {
-    path: path.resolve(__dirname, "../client_build"),
+    path: path.resolve(__dirname, "../server/dist"),
     filename: "bundle.js",
   },
   "devServer": {
