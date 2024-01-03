@@ -2,7 +2,7 @@ module.exports = {
   apps: [
     {
       name: 'eunoia_cluster',
-      script: 'index.js',
+      script: 'server_build/bundle.js',
       instances: 'max',
       exec_mode: 'cluster',
       watch: false,
