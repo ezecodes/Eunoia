@@ -7,7 +7,7 @@ Eunoia is a sleek and secure chat app designed for empowering conversations. Thi
 
 # Installation Steps:
 ## 1. Clone the Repository: 
-*`git clone https://github.com/jahdevelops/eunoia`*
+*`git clone https://github.com/ezecodes/eunoia`*
 ## 2. Client and Server Setup: 
 To set up both the client and server components using Docker, execute the following commands in your terminal:
 - *`docker compose build`*
