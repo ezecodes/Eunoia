@@ -1,4 +1,4 @@
-import React from 'react'
+eimport React from 'react'
 import { makeStyles } from '@material-ui/core/styles';
 import {Outlet, useNavigate} from 'react-router-dom'
 import styled from 'styled-components'
@@ -151,7 +151,7 @@ const Contact = ({show}) => {
 	const nodeRef = React.useRef(null)
 	const contacts = [
 		{icon: <Email />, name: 'Email', link: 'mailto:elijaheze777@gmail.com'},
-		{icon: <GitHub />, name: 'Github', link: 'https://github.com/jahdevelops'},
+		{icon: <GitHub />, name: 'Github', link: 'https://github.com/ezecodes'},
 		{icon: <LinkedIn />, name: 'LinkedIn', link: 'https://linkedin.com/elijah-eze-1b367521b'}
 	]
 	return (
